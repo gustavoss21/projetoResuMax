@@ -21,13 +21,13 @@
                 {% csrf_token %}
                 <div>
                     <label class="d-block" for="nome">Nome de usuario:</label>
-                    <input id="nome" name="nome" type="text" required>
+                    <input class="w-100 p-1" id="nome" name="nome" type="text" required>
                 </div>
                 <div>
                     <label class="d-block" for="senha">Senha:</label>
-                    <input id="senha" name="senha" type="password" autocomplete="off" required>
+                    <input class="w-100 p-1" id="senha" name="senha" type="password" autocomplete="off" required>
                 </div>
-                <input type="submit" class="btn btn-primary ms-auto" value="Login" required>
+                <input type="submit" class="btn btn-primary ms-auto mt-4" value="Login" required>
 
             </form>
             <span>Não tem cadastro ? </span><a href="{% url 'cadastro' %}">Cadastre-se</a>

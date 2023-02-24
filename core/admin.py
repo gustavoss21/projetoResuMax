@@ -5,24 +5,25 @@ from .models import ConteudoModel, SubtemaModel, TopicoModel, DestaqueModel, Imp
 
 @admin.register(ConteudoModel)
 class ConteudoAdmin(admin.ModelAdmin):
-    list_display = ('conteudo', 'tema',)
+    list_display = ('conteudo', 'tema', 'input_file',
+                    'summany_file', 'conteudo_pdf')
 
 
 @admin.register(SubtemaModel)
 class SubtemaAdmin(admin.ModelAdmin):
-    list_display = ('folha_index', 'subtema', 'index', 'tamanho',)
+    list_display = ('subtema','id')
 
 
 @admin.register(TopicoModel)
 class TopicoAdmin(admin.ModelAdmin):
-    list_display = ('folha_index', 'topico', 'index', 'tamanho',)
+    list_display = ('topico', 'id')
 
 
 @admin.register(DestaqueModel)
 class DestaqueAdmin(admin.ModelAdmin):
-    list_display = ('folha_index', 'destaque', 'index', 'tamanho',)
+    list_display = ('destaque', 'id')
 
 
 @admin.register(ImportanteModel)
 class ImportateAdmin(admin.ModelAdmin):
-    list_display = ('folha_index', 'importante', 'index', 'tamanho',)
+    list_display = ('importante', 'id')

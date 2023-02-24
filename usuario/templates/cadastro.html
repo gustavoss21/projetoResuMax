@@ -9,40 +9,30 @@
                 <h1 class="mb-4">Cadastro de Usuario</h1>
             </div>
             {% if msg %}
-            <div class="alert alert-danger" role="alert">
-                {{ msg }}
-            </div>
+            
             {% endif%}
             <form id="cadastro" class="form row" method="post" autocomplete="off">
                 {% csrf_token %}
-                <div>
-                    <label class="d-block" for="nome">Nome de usuario:</label>
-                    <input id="nome" name="nome" type="text" required>
-                    {% if usuarioInvalid %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ usuarioInvalid }}
+                {% for field in form %}
+                <div class="fieldWrapper">
+                    {{field.label_tag}}
+                    <div class="input-group mb-3">
+                        
+                        <input class="form-control" type="{%if field.html_name == 'username' %}text{%else%}password{%endif%}" name="{{field.html_name}}" maxlength="150" autofocus="" required="" id="{{field.id_for_label}}"
+                        aria-describedby="btn-{{field.id_for_label}}">
+                        <span class="input-group-text" id="btn-{{field.id_for_label}}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Tooltip on right">?</span>
                     </div>
-                    {% endif%}
-
-                </div>
-                <div>
-                    <label class="d-block" for="senha">Senha:</label>
-                    <input id="senha" name="senha" type="password" required>
-                    {% if senhaInvalid %}
+                   
+                    {% for error in field.errors %}
                     <div class="alert alert-danger" role="alert">
-                        {{ senhaInvalid}}
+                        {{ error }}
                     </div>
-                    {% endif%}
+                    {%endfor%}
+                    
+                    <div class="help" hidden>{{ field.help_text }}</div>
                 </div>
-                <div>
-                    <label class="d-block" for="senha2">Confirmar senha</label>
-                    <input id="senha2" name="senha2" type="password" required>
-                    {% if senha2Invalid %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ senha2Invalid }}
-                    </div>
-                    {% endif %}
-                </div>
+                {% endfor %}
+               
                 <input type="submit" class="btn btn-primary ms-auto" value="Cadastrar">
                 <span>Já tem conta ? faça <a href="{% url 'login' %}">login</a></span>
 
@@ -52,5 +42,20 @@
 
     </div>
     </div>
+    <script>
+        let butoes = document.querySelectorAll('span.input-group-text')
+        let div_help = document.querySelectorAll('div.help')
+        for(const butao of butoes){
+            butao.addEventListener('click',function(){
+                let index = [...butoes].indexOf(butao)
+                if(div_help[index].hasAttribute('hidden')){
+                    div_help[index].removeAttribute('hidden')
+                }else{
+                    div_help[index].setAttribute('hidden','hidden')
+                }
+            })
+        }
+
+    </script>
 </section>
 {% endblock %}

@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from django.db import models
 
 
@@ -6,6 +5,10 @@ class ConteudoModel(models.Model):
     id = models.BigAutoField(primary_key=True)
     conteudo = models.TextField()
     tema = models.TextField(blank=True)
+    input_file = models.FileField(upload_to='input_file', blank=True)
+    summany_file = models.FileField(upload_to='summany_file', blank=True)
+    conteudo_pdf = models.FileField(upload_to='conteudo_pdf', blank=True)
+
     def __str__(self):
         return self.conteudo
 
@@ -15,12 +18,10 @@ class ConteudoModel(models.Model):
 
 
 class SubtemaModel(models.Model):
-    conteudo = models.ForeignKey(ConteudoModel, on_delete=models.CASCADE)
     subtema = models.TextField(blank=True)
     index = models.IntegerField()
     tamanho = models.IntegerField()
     folha_index = models.IntegerField()
-
 
     class Meta:
         verbose_name = 'Subtema'
@@ -28,7 +29,6 @@ class SubtemaModel(models.Model):
 
 
 class TopicoModel(models.Model):
-    conteudo = models.ForeignKey(ConteudoModel, on_delete=models.CASCADE)
     topico = models.TextField(blank=True)
     index = models.IntegerField()
     tamanho = models.IntegerField()
@@ -40,7 +40,6 @@ class TopicoModel(models.Model):
 
 
 class DestaqueModel(models.Model):
-    conteudo = models.ForeignKey(ConteudoModel, on_delete=models.CASCADE)
     destaque = models.TextField(blank=True)
     index = models.IntegerField()
     tamanho = models.IntegerField()
@@ -52,7 +51,6 @@ class DestaqueModel(models.Model):
 
 
 class ImportanteModel(models.Model):
-    conteudo = models.ForeignKey(ConteudoModel, on_delete=models.CASCADE)
     importante = models.TextField(blank=True)
     index = models.IntegerField()
     tamanho = models.IntegerField()

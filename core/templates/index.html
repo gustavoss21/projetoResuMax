@@ -2,16 +2,20 @@
 {% load filtro_teste %}
 {% load static %}
 {% block conteiner %}
-<main class="row">
+<main>
     <!-- barra lateral esquerda -->
     {% include 'parciais/barra_lateral.html' %}
-
+    {% if output %}
+        {{ output|json_script:"date-input" }}
+    {% endif %}
     <!-- conteudo central - folhas -->
     {% include 'parciais/folha.html' %}
+    
 
     <!-- define o tamanho da folha -->
     <div id="tamanho-folha-edit">
         <input type="range" max="100" min="25" class="form-range" id="customRange1">
     </div>
+    
 </main>
 {% endblock %}

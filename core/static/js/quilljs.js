@@ -39,8 +39,8 @@ var toolbarOptions = [
     ['clean']
 ]
 
-function criarQuill() {
-    const quill = new Quill('.editor', {
+function criarQuill(folha) {
+    const quill = new Quill(folha, {
         modules: {
             toolbar: {
                 container: toolbarOptions,
@@ -49,16 +49,13 @@ function criarQuill() {
                 }
             }
         },
-        theme: 'bubble',//bubble
-        // placeholder: 'teste'
+        theme: 'bubble',
 
     })
 
     lista_Quill.push(quill)
 
 }
-//possivel causa de erro
-
 
 function urlImage() {
     let selection = this.quill.getSelection() //pegara a instancia de imagem definido acima

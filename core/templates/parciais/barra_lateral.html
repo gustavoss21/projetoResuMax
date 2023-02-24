@@ -1,11 +1,14 @@
 {% load static %}
-<div class="col-md-2 barra-lateral-esquerda d-none d-md-block">
+<div class="barra-lateral-esquerda">
     <div class="dropdown" id="bloco-right">
-        <button class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" type="button">filtro</button>
+        <button id="btn-filter" class="btn btn-secondary dropdown-toggle mb-3" data-bs-toggle="dropdown" type="button">
+            <span class="d-none d-md-inline">filtro</span>
+            <i class="fa-solid fa-filter d-md-none"></i>
+        </button>
         <ul class="dropdown-menu ps-4">
             <div>
                 <input type="checkbox" id="filtro" name="filtro" value="filtro">
-                <label for="filtro">filtrar</label>
+                <label for="filtro">filtrar </label>
             </div>
             <div class="check-container">
                 <li class="dropdown-item">
@@ -26,26 +29,48 @@
                 </li>
             </div>
         </ul>
-        <button type="button" class="btn btn-light w-75 mb-3" id="btn-nova-folha">
-            Nova Folha
+       
+        <button type="button" class="btn btn-light w-75 mb-3" id="btn-salvar-conteudo">
+            <span class="d-none d-md-inline">Salvar</span>
+
+            <i class="fa-solid fa-floppy-disk d-md-none"></i>
         </button>
-        <button type="button" class="btn btn-light w-75 mb-3" id="btn-salvar-conteudo">salvar</button>
-        {% if pdf %}
-        <a id="btn-baixar-pdf" id="baixar-pdf" href="{% static 'arquivos/' %}{{pdf}}" download>
+        <button class="btn btn-light w-75 mb-3" id="btn-nova-folha">
+            <span class="d-none d-md-inline">Nova Folha</span>
+            <i class="fa-regular fa-file d-md-none"></i>
+        </button>
+        <a id="btn-baixar-pdf" id="baixar-pdf" href="{% url 'baixar-pdf' %}">
             <button type="button" class="btn btn-light w-75 mb-3">
-                baixar c/ pdf
+            <span class="d-none d-md-inline">Baixar arquivo</span>
+                
+                <i class="fa-solid fa-file-arrow-down d-md-none"></i>
+
             </button>
         </a>
-        {% else %}
-        <a id="btn-baixar-pdf">
-            <button type="button" class="btn btn-light w-75 mb-3">
-                baixar c/ pdf
-            </button>
-        </a>
-        {% endif %}
-        <button type="button" class="btn btn-light w-75 mb-3" id="btn-leitura">Somente
-            leitura
+        <button type="button" class="btn btn-light w-75 mb-3" id="btn-leitura">
+            <span class="d-none d-md-inline">Somente leitura</span>
+
+            <i class="fa-regular fa-eye d-md-none"></i>
         </button>
+        <div class="btn-group dropend">
+            <button id="btn-adicionar-pdf" type="button" class="btn btn-light w-75 mb-3 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                
+            <span class="d-none d-md-inline">Anexar arquivo</span>
+
+                <i class="fa-solid fa-file-circle-plus d-md-none"></i>
+            </button>
+            <ul class="dropdown-menu">
+                <form id="form-file" action="{% url 'adiciona-arquivo'%}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                     <!-- Dropdown menu links -->
+                    <input type="file" id="avatar" name="avatar" accept="file/pdf, file/pdf">
+                </form>
+               
+
+            </ul>
+        </div>
+            
+        
 
 
 

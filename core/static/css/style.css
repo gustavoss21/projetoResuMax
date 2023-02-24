@@ -33,43 +33,82 @@ main.row{
 .navbar-brand>span {
     color: red;
 }
+
 /* ######################### */
-/* barra direita|esquerda */
-.barra-lateral-esquerda,
-.barra-folha {
+/* barra lateral esquerda */
+.barra-lateral-esquerda {
     color: rgb(0, 0, 0);
     font-size: 1.2em;
     padding: 20px 0px 0px 10px;
     background-color: rgba(173, 216, 230, 0.500);
     width: 198px;
     box-sizing: border-box;
-        width: 170px;
+    width: 170px;
+    position: fixed;
 }
-/* ######################### */
-/* barra lateral esquerda */
+.barra-lateral-esquerda button {
+    min-width: 133px;
+    margin: 0px 0px 10px 11px;
+}
+
+
 .barra-lateral-esquerda .solo:hover {
     background-color: LightBlue;
 }
 
-bloco-right li.ol:hover {
+.bloco-right li.ol:hover {
     background-color: rgba(173, 216, 230, 0.494);
 }
+.btn-group ul.dropdown-menu{
+    padding: 5px;
+    width: auto !important;
+}
+.barra-lateral-esquerda i {
+font-size: 18px;
+}
 
+@media (max-width:768px) {
+    .barra-lateral-esquerda {
+        width: 50px;
+        padding: 0;
+    }
+
+    .barra-lateral-esquerda button {
+        min-width: 50px;
+        margin: 0%;
+    }
+    .barra-lateral-esquerda button.btn {
+            border-radius: 0%;
+            box-sizing: border-box;
+            padding: 5px;
+        }
+}
+/* #bloco-right button.dropdown-toggle {
+    margin: 0px 0px 10px 11px;
+    width: 129px;
+    height: 40px;
+    background-color: rgb(87, 148, 168, 0.8);
+} */
 /* ######################### */
 /* conteudo central folha */
+
 .row {
     width: 100%;
     margin: initial;
 }
-
+#conteudo-central {
+    margin-top: 10px;
+    margin-left: 175px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+}
 #bloco-center {
     position: relative;
     padding: initial;
-    left: 15px;
+    /* position: static; */
+    /* left: 15px; */
 }
-#conteudo-central{
-    margin-top: 10px;
-}
+
 .editor.ql-container {
     margin-top: 20px;
     padding: 12% 17.4% !important;
@@ -77,13 +116,19 @@ bloco-right li.ol:hover {
     box-shadow: 1px 0px 20px -2px #00000036;
     background-color: white;
     font-size: inherit;
-    position: initial;
+    /* position: initial; */
 }
 
 
 .editor .ql-editor {
     padding: 0 !important;
-    overflow-y: hidden;
+    overflow: hidden;
+}
+
+.ql-editor {
+    padding: 0 !important;
+    overflow: hidden;
+    position: relative;
 }
 
 .selecao {
@@ -122,6 +167,30 @@ bloco-right li.ol:hover {
 
 #check-li li:hover {
     background-color: initial;
+}
+#folha-obtida{
+    position: relative;
+    max-width: 80%;
+    margin: auto;
+    box-sizing: border-box;
+}
+.conteinar-tex-funcao{
+    background: #00000063;
+    padding: 37px 10px 10px 10px;
+    border-radius: 10px;
+}
+.text-fucao{
+    display: flex;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+}
+@media (max-width:768px) {
+    #conteudo-central {
+        /* margin: 30px; */
+        margin-left: 60px;
+    }
 }
 
 /* 
@@ -173,19 +242,22 @@ destaque-color:yellow
 .text-destaque {
     border: 1px solid rgb(255, 255, 0, 0.5);
 }
+#btn-baixar-resumo {
+    position: relative;
+    top: -28px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #565e64;
+    color: white;
+    font-size: 15px;
+    box-shadow: 5px 2px 8px 0px #0a0a0a4f;
+}
+#btn-baixar-resumo:hover {
+        box-shadow: inset 0px 0px 8px 0px;
+}
 /* ######################### */
 /* barra lateral direita */
-#bloco-right button {
-    min-width: 133px;
-    margin: 0px 0px 10px 11px;
-}
 
-#bloco-right button.dropdown-toggle {
-    margin: 0px 0px 10px 11px;
-    width: 129px;
-    height: 40px;
-    background-color: rgb(87, 148, 168, 0.8);
-}
 
 .barra-folha li:hover {
     background-color: LightBlue;
