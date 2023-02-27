@@ -26,7 +26,7 @@ SECRET_KEY = 'l&7n=nm$fl_q_75!r*2dmh8ev7)sy*70%s*_dpkicm_%*i_(mz'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['191.101.70.238']
+ALLOWED_HOSTS = ['191.101.70.238','resumax.com']
 
 
 # Application definition
