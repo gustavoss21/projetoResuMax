@@ -24,9 +24,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'l&7n=nm$fl_q_75!r*2dmh8ev7)sy*70%s*_dpkicm_%*i_(mz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['191.101.70.238']
 
 
 # Application definition
@@ -77,16 +77,23 @@ WSGI_APPLICATION = 'resumax.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-}
-# DATABASES = {
-#     'default': dj_database_url.config()
-# }
+}"""
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'resumaxbase',
+        'USER': 'resumaxuser',
+        'PASSWORD': '991465393Gs@',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
