@@ -1,0 +1,12 @@
+__pycache__
+*.*-
+*.pyc
+.env
+.idea
+.vscode
+db.sqlite3
+migrations
+**/lib
+node_modules/
+media/
+venv/

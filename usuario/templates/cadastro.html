@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block conteiner %}
+<section>
+    <div id="container-main" class="row justify-content-center  align-items-center">
+        <div style="width: 425px">
+            <div class="text-center">
+                <i class="fa-regular fa-user" style="font-size: 100px; margin: 50px 0px;"></i>
+                <h1 class="mb-4">Cadastro de Usuario</h1>
+            </div>
+            {% if msg %}
+            
+            {% endif%}
+            <form id="cadastro" class="form row" method="post" autocomplete="off">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="fieldWrapper">
+                    {{field.label_tag}}
+                    <div class="input-group mb-3">
+                        
+                        <input class="form-control" type="{%if field.html_name == 'username' %}text{%else%}password{%endif%}" name="{{field.html_name}}" maxlength="150" autofocus="" required="" id="{{field.id_for_label}}"
+                        aria-describedby="btn-{{field.id_for_label}}">
+                        <span class="input-group-text" id="btn-{{field.id_for_label}}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Tooltip on right">?</span>
+                    </div>
+                   
+                    {% for error in field.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </div>
+                    {%endfor%}
+                    
+                    <div class="help" hidden>{{ field.help_text }}</div>
+                </div>
+                {% endfor %}
+               
+                <input type="submit" class="btn btn-primary ms-auto" value="Cadastrar">
+                <span>Já tem conta ? faça <a href="{% url 'login' %}">login</a></span>
+
+        </div>
+
+        </form>
+
+    </div>
+    </div>
+    <script>
+        let butoes = document.querySelectorAll('span.input-group-text')
+        let div_help = document.querySelectorAll('div.help')
+        for(const butao of butoes){
+            butao.addEventListener('click',function(){
+                let index = [...butoes].indexOf(butao)
+                if(div_help[index].hasAttribute('hidden')){
+                    div_help[index].removeAttribute('hidden')
+                }else{
+                    div_help[index].setAttribute('hidden','hidden')
+                }
+            })
+        }
+
+    </script>
+</section>
+{% endblock %}
