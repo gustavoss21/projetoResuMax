@@ -192,7 +192,18 @@ font-size: 18px;
         margin-left: 60px;
     }
 }
-
+#maisfolha{
+    background-color: #0061ff;
+    max-width: 116px;
+    border-radius: 5px 5px 0px 0px;
+    margin: auto;
+    color: white;
+    padding: 5px 10px;
+    display: none;
+}
+#maisfolha:hover{
+    background-color: #033789;
+}
 /* 
 subtema-color: blue
 topico-color: green

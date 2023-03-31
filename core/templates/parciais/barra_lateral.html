@@ -60,7 +60,7 @@
                 <i class="fa-solid fa-file-circle-plus d-md-none"></i>
             </button>
             <ul class="dropdown-menu">
-                <form id="form-file" action="{% url 'adiciona-arquivo'%}" method="post" enctype="multipart/form-data">
+                <form id="form-file" action="{% url 'home'%}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                      <!-- Dropdown menu links -->
                     <input type="file" id="avatar" name="avatar" accept="file/pdf, file/pdf">

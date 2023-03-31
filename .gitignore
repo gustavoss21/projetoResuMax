@@ -9,4 +9,4 @@ migrations
 **/lib
 node_modules/
 media/
-venv/
+env/

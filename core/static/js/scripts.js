@@ -13,7 +13,10 @@ let clone_conteudo
 var conta_folha = 0
 var modo_leitura = false
 var interador_folha = 0
-let lista_conteudo = []
+let lista_conteudo = ''
+let render_start = false
+let num_pagina = 5
+
 
 //faz com que o dropdown nao suma ao clicar no item
 $("#bloco-right").on('click', '.dropdown-item', function (event) { event.stopPropagation(); });
@@ -27,7 +30,6 @@ function criaElementoFolha() {
     criarQuill(folha_edite)
 
 }
-
 
 function rangeFolha() {
     let folha = document.querySelector('.ql-editor')
@@ -55,7 +57,6 @@ function defineTamanhoFolha(folha) {
     bloco_center.style.width = largura + 'px'
 
     if (!modo_leitura) {
-
         ajustaTamanhoFont(folha)
         folhas.forEach(function (elemeno) { ajustaAlturaFolha(elemeno) })
     }
@@ -126,10 +127,10 @@ async function ativaModoLeitura() {
     folha_leitura.setAttribute('id', 'folha-leitura')
    
     bloco_center.appendChild(folha_leitura)
-    lista_conteudo.forEach(valeu => {
-        folha_leitura.appendChild(valeu)
-    })
-    lista_conteudo = []
+
+    folha_leitura.innerHTML = lista_conteudo
+    
+    lista_conteudo = ''
     
     editor.forEach(function (folha) {
         folha.setAttribute('hidden', 'hidden')
@@ -190,50 +191,32 @@ function desativaModoLeitura() {
  */
 async function setTextSheet(folha, nova_folha) {
     folhas_renderizadas = true
-    const folha_altura = folha.offsetHeight
+    render_start = true
+    num_pagina--
+    
     
     if (!nova_folha) {
         lista_conteudo = await mixinsetTextSheet()
+        console.log(lista_conteudo)
+        // folha.appendChild(lista_conteudo[0])
     }
-    for (let inicio_interador=0; inicio_interador < lista_conteudo.length;) {
-        let element = lista_conteudo[inicio_interador]
 
-       // create a new page if it have the page class
-        if (element.hasAttribute('class')) {
-            let class_p = element.getAttribute('class')
+    folha.innerHTML = lista_conteudo
+    lista_conteudo = ''
 
-            if (class_p === 'page' && !nova_folha) {
-                folha =  novaFolha(true)
-                posicao_final = 0
-            }
+    if (folha.offsetHeight < folha.scrollHeight) {
+        lista_conteudo = desceTextoFolha(folha)
+        if (num_pagina < 0) {
+            let elemento_mais_folha = document.querySelector('#maisfolha')
+            elemento_mais_folha.style.display = 'block'
+            return
         }
+        folha = novaFolha(true)
+        return setTextSheet(folha, true)
+    }
 
-        nova_folha = false
-        folha.appendChild(element)
-        lista_conteudo.shift()
-        let posicao_p = folha.lastElementChild.offsetTop
-        let altura_p = folha.lastElementChild.offsetHeight
-        let posicao_final = posicao_p + altura_p //+ element.offsetHeight
-        //create new folha
-        if (posicao_final+10 >= folha_altura) {
-
-            let texto = desceTextoFolha(folha)
-            if (texto) {
-                const new_elemeno = document.createElement('p')
-                let text_node = document.createTextNode(texto)
-                new_elemeno.appendChild(text_node)
-                lista_conteudo.push(new_elemeno)
-            }
-            folha = novaFolha(true)
-            posicao_final = 0
-        }
-        // remove p that was created automatically by Quill
-        if (folha.firstChild.innerText === '\n') {
-            folha.firstChild.remove()
-        }
-        //add element in folha and remove of lista_conteudo
-        
-    }    
+    render_start = false
+    getSelecao()
 }
 /**
  *define o conteudo que sera renderizado
@@ -246,14 +229,15 @@ async function mixinsetTextSheet() {
     }
 
     let data = await getSheetData()
-
     if ('vazio' === data) return []
 
     data = Object.values(data)[0]
-    let parser = new DOMParser();
-    const doc = parser.parseFromString(data, 'text/html');
-    lista_conteudo = [...doc.getElementsByTagName('p')]
-    return lista_conteudo
+    // console.log(data)
+
+    // let parser = new DOMParser();
+    // const doc = parser.parseFromString(data, 'text/html');
+    // lista_conteudo = [...doc.getElementsByTagName('p')]
+    return data
 }
 /**
  * limita em apenas 1 elemento que passa o limite da folha
@@ -261,94 +245,72 @@ async function mixinsetTextSheet() {
  * @returns (ultimos: str, primeiro: elementHtml)
  */
 function mixinDesceTexto(folha) {
-    const lista = folha.children
-    let folha_altura = folha.offsetHeight
-    let elementos_passou = ''
-    let ultimo_indice_passou 
-    let elementos
-    let primeiro_passou
+    let lista_passou
+    let new_text = ''
+    let pass = 1
 
-    for (let indece = 0; indece < lista.length; indece++){
-        const elemento = lista[lista.length - indece]
-        if(!elemento)continue
-        let posicao_p = elemento.offsetTop
-        let altura_p = elemento.offsetHeight
-        let posicao_final = posicao_p + altura_p
+    for( let p of folha.childNodes){
+        let position_p = p.offsetTop
+        let height_p = p.offsetHeight
+        let position_and = position_p + height_p
 
-        if (posicao_final +20 > folha_altura) {
-            primeiro_passou = elemento
-        }
-        else {
-            if (indece <= 1) {
-                return false
+        if (position_and + 10 > folha.offsetHeight) {
+
+            if (p.outerHTML) {
+                if (pass > 0) {
+                    new_text += p.outerHTML
+                    pass -= 1
+
+                    continue
+                }
+                let index_pass = folha.innerHTML.indexOf(p.outerHTML)
+                lista_passou = folha.innerHTML.slice(index_pass,)
+                break
+                
             }
-            break
-        } 
 
+        } else {
+            if (p.outerHTML) new_text += p.outerHTML
+        }
     }
-    ultimo_indice_passou = [...lista].indexOf(primeiro_passou)
-    // obtem todos os elementos que passaram a folha exceto primeiro_passou
-    elementos = [...lista].slice(ultimo_indice_passou + 1,)
-    elementos.forEach(function (elemeno) {
-        elementos_passou += elemeno.innerHTML
-        elemeno.remove()
-    }
-    )
-    return { 'ultimos': elementos_passou, 'primeiro': primeiro_passou }
+
+    folha.innerHTML = new_text
+    return lista_passou
     
 //     
 }
 function desceTextoFolha(folha) {
     let elementos_passou = mixinDesceTexto(folha)//paragrafos(ultimos,primeiro)
-    if(!elementos_passou) return false
-    let elemento = elementos_passou['primeiro']
+    let elemento = folha.lastElementChild
     let conteudo_quebra
     let height_folha = folha.offsetHeight
     let contador = 0
-    let indice_fim
-    let texto = (elemento.innerText).split(' ')
-    let for_texto
-    let novo_elemento    
+    let texto = (elemento.innerText).split(' ')  
+    let index 
 
     if (texto[0] == "\n" && texto.length < 1) {
         return false
 
     }
-    for (let palavra of texto) {
+    for (index = texto.length; index > 0; index--) {
         contador--
         let height_p = folha.lastChild.offsetHeight
         let posicion_p = folha.lastChild.offsetTop
         let posicion_and = height_p+posicion_p
-        
+        if(!texto[index])continue
         if (posicion_and+10 > height_folha) {
-
-            for_texto = texto.slice(0, contador)
-            if (for_texto.length < 1) {
-                return '<br>'
-            }
-            for_texto = (for_texto.join(' ')).toString()
-            let texto_node = document.createTextNode(for_texto)
-            if (contador === -1) {
-                novo_elemento = document.createElement('p')
-                novo_elemento.setAttribute('class', 'teste')
-                novo_elemento.appendChild(texto_node)
-                elemento.remove()
-                elemento = false
-
-            } else {
-                novo_elemento.remove()
-                novo_elemento = document.createElement('p')
-                novo_elemento.setAttribute('class', 'teste')
-                novo_elemento.appendChild(texto_node)
-
-            }
-            folha.appendChild(novo_elemento)
-            indice_fim = contador
-        } 
+            let text_start = texto.slice(0, index)
+            elemento.innerText = text_start.join(' ')
+        } else{ break}
     }
 
-    conteudo_quebra = (texto.slice(indice_fim,)).join(' ')
-    return conteudo_quebra + elementos_passou['ultimos']
+    // conteudo_quebra = (texto.slice(indice_fim,)).join(' ')
+
+    let text_end = texto.slice(index + 1,)
+    conteudo_quebra = `<p>${text_end.join(' ')}</p>`
+    if (!elementos_passou) elementos_passou = ''
+
+    return conteudo_quebra + elementos_passou
 }
 function mixinSobeTexto(folha,folha2) {
     let folha_altura = folha.offsetHeight
@@ -429,7 +391,6 @@ function sobeTextoFolha(folha, folha2) {
 
     return teste + ' ' + conteudo_quebra
 }
-
 function verificarParagrafo(paragrafos) {
     let p_boolean = false
 
@@ -469,7 +430,7 @@ function novaFolha(renderia_conteudo=false,page_break,indece_folha) {
     // definicoesSelecaoTexto()
     if (renderia_conteudo) return nova_folha.firstChild
 
-    return setTextSheet(nova_folha.firstChild,true)
+    // return setTextSheet(nova_folha.firstChild,true)
  
 }
 
@@ -487,16 +448,19 @@ function distrubuirTextoQuebra(folha1, folha2) {
         }
     }
     posicao_ultimo_paragrafo = ultimo_elemento.offsetTop + ultimo_elemento.offsetHeight - padi
-
+    render_start = false //para o seMunda ativar 
 }
 
 function SeMudanca(cont) {
+    if (render_start) return
+
     let folhas = document.querySelectorAll('.ql-editor')
     let alturaMax = folhas[cont].offsetHeight
     let altura_scroll = folhas[cont].scrollHeight
     let contador = 0
     let paragrafo_passou = []
     let texto
+    console.log('se mudanca')
     /**
         destribui o texto que couber ate o limite da folha, o restante para a
         proxima folha
@@ -511,23 +475,17 @@ function SeMudanca(cont) {
             //adiciona paragrafo à lista
             texto = desceTextoFolha(folhas[cont])
             if (texto) {
-                let patern = /(.*)/g
-                let tex_list = texto.match(patern)
-                if (folhas[cont + 1]) {
-                    tex_list.forEach(elemento => {
-                        let new_p = document.createElement('p')
-                        new_p.innerText = elemento
-                        folhas[cont + 1].insertBefore(new_p, folhas[cont + 1].children[0])
-                    })
-                } else {
 
-                    tex_list.forEach(text => {
-                        let new_p = document.createElement('p')
-                        new_p.innerText = text
-                        lista_conteudo.push(new_p)
-                    })
-                    return novaFolha()
+                if (folhas[cont + 1]) {
+                    let html_folha = folhas[cont + 1].innerHTML
+                    folhas[cont + 1].innerHTML = texto
+                    folhas[cont + 1].innerHTML += html_folha
                     
+                } else {
+                        
+                    lista_conteudo += texto
+                    let folha = novaFolha(true)
+                    setTextSheet(folha,true)
 
                 }
 
@@ -557,7 +515,6 @@ function apagaEQuebra(evt,indece) {
     let folhas = document.querySelectorAll('.ql-editor')
     let texto_resto_quebra
 
-    // folhas[indece - 1].lastChild.remove()
     texto_resto_quebra = sobeTextoFolha(folhas[indece - 1], folhas[indece])
 
     if (texto_resto_quebra) {
@@ -611,3 +568,4 @@ input_range.addEventListener('click', function () {
     defineTamanhoFolha(folha)
 })//definirar novas dimençoes da folha
 btn_leitura.addEventListener('click', modoLeitura)//define se a folha é editavel
+

@@ -1,10 +1,13 @@
 let clicked_tecla = false
 let btn_salvar_conteudo = document.querySelector('#btn-salvar-conteudo')
 let renderiza_pdf = false
-let text_pdf = document.getElementById('date-input')
+let script_text = document.getElementById('date-input')
 let folhas_renderizadas = false
-if (text_pdf) {
-    text_pdf = JSON.parse(text_pdf.textContent);
+let btn_mais_folha = document.querySelector('#maisfolha')
+let text_pdf
+if (script_text) {
+    text_pdf = JSON.parse(script_text.textContent);
+    script_text.remove()
 }
 let value_temporario = document.getElementById('temporario-dados')
 if (value_temporario) {
@@ -58,7 +61,6 @@ loadFilter()
 adicionaFucaoTextoToolbar()
 setBotao()//salva os tipos de texto
 
-
 document.addEventListener('keydown', btn => {
     let list_btn = ['Delete', 'ArrowUp', 'Backspace', 'ArrowDown','Enter']
     if (list_btn.indexOf(btn.key) === -1)return
@@ -85,7 +87,6 @@ btn_baixar_resumo.addEventListener('click', function () {
 
 checked_filter.addEventListener('click', function () { definicoesFilter() })
 
-
 btn_salvar_conteudo.addEventListener('click', function () {
     if (renderiza_pdf) {
         let confirm = window.confirm('seu arquivo anterior será substituido! ')
@@ -96,6 +97,15 @@ btn_salvar_conteudo.addEventListener('click', function () {
         }
     }
     salvarConteudo()
-    return location.reload()
+    // return location.reload()
 
+})
+
+function maisFolha() {
+    
+}
+btn_mais_folha.addEventListener('click', () => {
+    // let nova_folha = novaFolha(true)
+    num_pagina = 5
+    // setTextSheet(nova_folha,true)
 })

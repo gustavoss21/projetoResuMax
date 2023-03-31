@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (HomeView, SalvarConteudo, SalvarDestaque,
                     SalvarImportante, SalvarSubtema, SalvarTopico,
-                    apagadorTextoFucao, BaixarArquivo, AdicionaArquivo,
+                    apagadorTextoFucao, BaixarArquivo,
                     GetDataAll, GetSheetData)
 
 urlpatterns = [
@@ -13,7 +13,6 @@ urlpatterns = [
     path('salvarTopico/', SalvarTopico.as_view(), name='salvarTopico'),
     path('apagadorTextoFucao/', apagadorTextoFucao, name='apagadorTextoFucao'),
     path('baixar-pdf/', BaixarArquivo.as_view(), name='baixar-pdf'),
-    path('adiciona-arquivo/', AdicionaArquivo.as_view(), name='adiciona-arquivo'),
     path('get-dados/', GetDataAll.as_view(), name='get-dados'),
     path('get-sheet-data/', GetSheetData.as_view(), name='get-sheet-data'),
     

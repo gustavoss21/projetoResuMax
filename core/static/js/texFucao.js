@@ -19,13 +19,20 @@ function retorna_html() {
         conteudo += pagina.innerHTML
         pdf += pagina.textContent
     }
-    return [conteudo,pdf]
+    if (lista_conteudo) {
+        conteudo += lista_conteudo
+        let pattern = /<p.*?>(.*?)<\/p>/g
+        let new_list = lista_conteudo.replace(pattern, '$1 ')
+        pdf+=new_list
+    }
+    return [conteudo, pdf]
 }
 
 function salvarConteudo() {
     let artigo = retorna_html()
     let data_pdf = artigo[1]
     artigo = artigo[0]
+    // console.log(artigo)
 
     fetch("/salvarConteudo/", {
         method: 'POST',
@@ -256,20 +263,21 @@ function submitForm() {
 }
 
 function pdfAdd(data) {
-    let pattern = /(.*(\n)*.*)/g
-    let lista = data.replace(pattern, '<p> $1 </p>')
-    let div_conteudo_texto = document.createElement('div')
-
-    div_conteudo_texto.innerHTML = lista
-    
-    return [...div_conteudo_texto.children]
+    let palavras = data.split('. ')
+    for (let index = 0; index < palavras.length; index++) {
+        palavras[index] = `<p>${palavras[index]}.</p>`
+    }
+    return palavras.join('')
+   
 }
 
 function getSelecao() {
     for (const elemeno of lista_Quill) {
         elemeno.on('text-change', function (delta, oldDelta, source) {
-            SeMudanca(lista_Quill.indexOf(elemeno))
+                
+                SeMudanca(lista_Quill.indexOf(elemeno))
         });
+        
     }
 }
 /**
@@ -313,7 +321,6 @@ async function getDataAll() {
         
         for (let item of Object.keys(response)) {
             let input_filter = document.querySelector('#' + item)
-
             lista_funcoes_texto[item] = [response[item],input_filter] 
         }
         return lista_funcoes_texto
@@ -333,7 +340,9 @@ async function getSheetData() {
     return customer
     
 }
-
+/**
+ * evita que a folha sobreponha o filtro e outros elementos da barra lateral
+ */
 document.addEventListener('click', event => {
     let btn_adiciona_arquivo = document.querySelector('#btn-adicionar-pdf')
     let btn_filter = document.querySelector('#btn-filter')

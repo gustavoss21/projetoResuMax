@@ -21,6 +21,25 @@ def dados(model):
 class HomeView(TemplateView):
     template_name = 'index.html'
 
+    def post(self,request,*args,**kwargs):
+        context = {}
+        file = request.FILES
+        file = file.get('avatar')
+        support_type = ['pdf','txt']
+        if not (file.name[-3:] in support_type):
+            messages.error(request,'Error: typo de arquivo não suportado.')
+            return redirect('home')
+        
+        texto = utils.text_extract(file)
+        if not texto:
+            messages.error(request,'arquivo não suportado!')
+            context['output'] = 'vazio'
+            return render(request,'index.html')
+        
+        print(texto)
+        context['output'] = texto
+        return render(request,'index.html',context)
+
       
 def apagadorTextoFucao(request):
     dados = json.loads(request.body)
@@ -133,24 +152,6 @@ class BaixarArquivo(View):
 			return	redirect('home')
         
 
-class AdicionaArquivo(View):
-    def post(self, request, *args, **kwargs):
-        context = {}
-        file = request.FILES
-        file = file.get('avatar')
-        support_type = ['pdf','txt']
-        if not (file.name[-3:] in support_type):
-            messages.error(request,'Error: typo de arquivo não suportado.')
-            return redirect('home')
-        
-        texto = utils.text_extract(file)
-        print(texto)
-        context['output'] = texto
-        return render(request,'index.html',context)
-    
-    def get(self, request, *args, **kwargs):
-        return redirect('home')
-
 class GetDataAll(View):
     def get(self, request, *args, **kwargs):
         subtema = SubtemaModel.objects.all()
@@ -162,7 +163,6 @@ class GetDataAll(View):
             'importante': dados(importante),
             'destaque': dados(destaque),
             'topico': dados(topico)}
-        # print(111111111,objeto) #mandar todas as informaçoes
         return HttpResponse(json.dumps(objeto))
     
 class GetSheetData(View):
