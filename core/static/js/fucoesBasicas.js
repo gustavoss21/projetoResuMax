@@ -267,8 +267,9 @@ function clickedTecla(btn) {
 
     }
 
-    let getSeletor = lista_Quill[index_folha].getSelection()
+    let getSeletor = lista_Quill[index_folha]
     if (!getSeletor) return
+    getSeletor = getSeletor.getSelection()
     let index = getSeletor.index
     folhas = document.querySelectorAll('.ql-editor')
     clicked_tecla = false
@@ -330,10 +331,8 @@ function clickedTecla(btn) {
         if (btn.key === 'Enter') {
             let texto = desceTextoFolha(folhas[index_folha])
             if (texto) {
-                const new_elemeno = document.createElement('p')
-                let text_node = document.createTextNode(texto)
-                new_elemeno.innerHTML = texto
-                folhas[index_folha + 1].insertBefore(new_elemeno, folhas[index_folha + 1].children[0])
+                let html_folha = folhas[index_folha + 1].innerHTML
+                folhas[index_folha + 1].innerHTML = texto+html_folha
             }
         }
         if (btn.key === 'Backspace' || btn.key === 'Delete') {

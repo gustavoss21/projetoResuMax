@@ -30,6 +30,7 @@ class LoginView(BaseFormView):
             messages.warning(
                 request, f'Você já esta logado com usuario "{request.user}"')
             return redirect('home')
+        print(111111111111,request.user)
 
         user_login = request.POST.get('nome').strip()
         senha_login = request.POST.get('senha').strip()

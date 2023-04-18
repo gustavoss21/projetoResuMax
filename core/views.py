@@ -1,14 +1,20 @@
 from django.shortcuts import render
+import re
+import jsonpickle
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView, View
 import json
+from io import StringIO
 from .utils import utils
 from .models import ConteudoModel,DestaqueModel,ImportanteModel,SubtemaModel,TopicoModel
 from django.core.files.base import ContentFile
 from django.http import FileResponse
-# Create your views here.
+import tempfile
+import os
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 # atençao a parada forçada na renderizaçao da folha
 def dados(model):
@@ -21,23 +27,38 @@ def dados(model):
 class HomeView(TemplateView):
     template_name = 'index.html'
 
+    @method_decorator(login_required(login_url='login'))
     def post(self,request,*args,**kwargs):
         context = {}
-        file = request.FILES
-        file = file.get('avatar')
+        file1 = request.FILES
+        file1 = file1.get('avatar')
         support_type = ['pdf','txt']
-        if not (file.name[-3:] in support_type):
+        if not (file1.name[-3:] in support_type):
             messages.error(request,'Error: typo de arquivo não suportado.')
             return redirect('home')
         
-        texto = utils.text_extract(file)
-        if not texto:
-            messages.error(request,'arquivo não suportado!')
+        intense_file = utils.text_extract(file1)
+        if not intense_file:
+            messages.error(request, 'arquivo não suportado!')
             context['output'] = 'vazio'
-            return render(request,'index.html')
-        
-        print(texto)
-        context['output'] = texto
+            return render(request, 'index.html')
+
+        last_page = intense_file[1]
+        text = intense_file[0]
+
+        if len(text) < 10:
+            messages.error(request, 'Error na leitura do arquivo.')
+            return redirect('home')
+
+        context['output'] = text
+        conteudo = ConteudoModel.objects.filter(user=request.user.id)
+
+        if conteudo and not last_page:
+            conteudo[0].conteudo_pdf = file1
+            conteudo[0].save()
+            request.session['pagina'] = 15
+            request.session.save()
+        print(request.session.get('pagina'))
         return render(request,'index.html',context)
 
       
@@ -75,15 +96,8 @@ class SalvarConteudo(View):
                 request.session.save()
             return HttpResponse(json.dumps({'redirect': 'usuario/login'}))
         artigo = ConteudoModel.objects.all()
-        resultado = artigo.get_or_create(id=1)
+        resultado = artigo.get_or_create(id=1, user=request.user)
         resultado[0].conteudo = dados.get('conteudo')
-       
-        if resultado[0].conteudo_pdf:
-            utils.apagarPdf(resultado[0].conteudo_pdf.path)
-        content_file = ContentFile(
-            (dados.get('pdf')).encode('UTF-8'), name='arquivoResumax.txt')
-       
-        resultado[0].conteudo_pdf = content_file
         resultado[0].save()
         return HttpResponse('1')
     
@@ -93,7 +107,8 @@ class SalvarTopico(View):
         
         if usuario.is_authenticated:
             dados = json.loads(request.body)
-            TopicoModel.objects.create(topico=dados.get('topico'), index=dados.get('index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'))
+            TopicoModel.objects.create(topico=dados.get('topico'), index=dados.get(
+                'index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'), user=request.user)
 
         else:
 
@@ -107,7 +122,7 @@ class SalvarSubtema(View):
 
         if usuario.is_authenticated:
             SubtemaModel.objects.create(subtema=dados.get('subtema'), index=dados.get(
-                'index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'))
+                'index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'), user=request.user)
  
         else:
 
@@ -121,7 +136,7 @@ class SalvarDestaque(View):
 
         if usuario.is_authenticated:
             DestaqueModel.objects.create(destaque=dados.get('destaque'), index=dados.get(
-                'index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'))
+                'index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'), user=request.user)
 
         else:
 
@@ -134,7 +149,8 @@ class SalvarImportante(View):
         usuario = request.user
 
         if usuario.is_authenticated:
-            ImportanteModel.objects.create(importante=dados.get('importante'), index=dados.get('index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'))
+            ImportanteModel.objects.create(importante=dados.get('importante'), index=dados.get(
+                'index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'), user=request.user)
 
         else:
 
@@ -143,21 +159,29 @@ class SalvarImportante(View):
 
 
 class BaixarArquivo(View):
-	def get(self, request, *args, **kwargs):
-		pdf = ConteudoModel.objects.filter(id=1).first()
-		if pdf:
-			return	FileResponse(pdf.conteudo_pdf, as_attachment=True)
-		else:
-			messages.warning(request,'salve primeiro para baixar pdf ')
-			return	redirect('home')
+    def get(self, request, *args, **kwargs):   
+        model_conteudo = ConteudoModel.objects.filter(user=request.user.id).first()
+        if model_conteudo:
+            #tira as tags do texto
+            paterh = r'<.*?>'
+            conteudo = re.sub(paterh, '', model_conteudo.conteudo)
+
+            #gera o arquivo
+            content_file = ContentFile(
+                conteudo.encode('UTF-8'), name=f'{request.user.username}.txt')
+            return FileResponse(content_file, as_attachment=True)
+        
+        else:
+            messages.warning(request,'salve primeiro para baixar pdf ')
+            return	redirect('home')
         
 
 class GetDataAll(View):
     def get(self, request, *args, **kwargs):
-        subtema = SubtemaModel.objects.all()
-        importante = ImportanteModel.objects.all()
-        destaque = DestaqueModel.objects.all()
-        topico = TopicoModel.objects.all()
+        subtema = SubtemaModel.objects.filter(user=request.user.id)
+        importante = ImportanteModel.objects.filter(user=request.user.id)
+        destaque = DestaqueModel.objects.filter(user=request.user.id)
+        topico = TopicoModel.objects.filter(user=request.user.id)
         objeto = {
             'subtema': dados(subtema),
             'importante': dados(importante),
@@ -170,7 +194,8 @@ class GetSheetData(View):
         usuario = request.user
 
         if usuario.is_authenticated:
-            conteudo = dados(ConteudoModel.objects.all())
+            conteudo = dados(
+                ConteudoModel.objects.filter(user=request.user.id))
             if len(conteudo) == 0:
                 return HttpResponse(json.dumps('vazio'))
             
@@ -179,8 +204,33 @@ class GetSheetData(View):
             if temporario:
                 del request.session['temporario']
                 return HttpResponse(json.dumps({'conteudo':conteudo['conteudo'],'temporario':temporario}))
-
-            return HttpResponse(json.dumps({'conteudo': conteudo['conteudo']}))
+            return HttpResponse(json.dumps({'conteudo': conteudo['conteudo'], 'mais_folha': False}))
         return HttpResponse(json.dumps('vazio'))
 
 
+class MaisFolhas(View):
+
+    @method_decorator(login_required(login_url='login'))
+    def get(self,request,*args,**kwargs):
+        conteudo = ConteudoModel.objects.filter(user=self.request.user.id)
+        file = conteudo[0].conteudo_pdf
+        pagina = request.session.get('pagina')
+        print(4444,file)
+        print(5555,dir(file))
+        intense_file = utils.text_extract(file.file, pagina)
+        if not intense_file:
+            return redirect('home')
+        last_page = intense_file[1]
+        if last_page:
+            if request.session.get('pagina'):
+                del request.session['pagina']
+            os.remove(file.path)
+
+            
+        text = intense_file[0]
+
+        return HttpResponse(json.dumps({'conteudo': text,'mais_folha':last_page}))
+    
+
+# io = StringIO('["streaming API"]')
+# json.load(io)

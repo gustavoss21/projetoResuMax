@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (HomeView, SalvarConteudo, SalvarDestaque,
                     SalvarImportante, SalvarSubtema, SalvarTopico,
                     apagadorTextoFucao, BaixarArquivo,
-                    GetDataAll, GetSheetData)
+                    GetDataAll, GetSheetData, MaisFolhas)
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
@@ -15,6 +15,7 @@ urlpatterns = [
     path('baixar-pdf/', BaixarArquivo.as_view(), name='baixar-pdf'),
     path('get-dados/', GetDataAll.as_view(), name='get-dados'),
     path('get-sheet-data/', GetSheetData.as_view(), name='get-sheet-data'),
+    path('mais-folhas/', MaisFolhas.as_view(), name='mais-folhas'),
     
 ]
 

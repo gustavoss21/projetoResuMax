@@ -17,21 +17,19 @@ function retorna_html() {
     for (let pagina of folhas) {
         elemento_vazio = pagina.firstElementChild
         conteudo += pagina.innerHTML
-        pdf += pagina.textContent
+        // pdf += pagina.textContent
     }
     if (lista_conteudo) {
         conteudo += lista_conteudo
-        let pattern = /<p.*?>(.*?)<\/p>/g
-        let new_list = lista_conteudo.replace(pattern, '$1 ')
-        pdf+=new_list
+        // let pattern = /<p.*?>(.*?)<\/p>/g
+        // let new_list = lista_conteudo.replace(pattern, '$1 ')
+        // pdf+=new_list
     }
-    return [conteudo, pdf]
+    return conteudo
 }
 
 function salvarConteudo() {
     let artigo = retorna_html()
-    let data_pdf = artigo[1]
-    artigo = artigo[0]
     // console.log(artigo)
 
     fetch("/salvarConteudo/", {
@@ -39,7 +37,7 @@ function salvarConteudo() {
         headers: {
             'X-CSRFToken': csrf_token
         },
-        body: JSON.stringify({ 'conteudo': artigo, 'pdf': data_pdf })
+        body: JSON.stringify({ 'conteudo': artigo})
     }).then(function (data) {
         return data.json()
     }).then(function (data) {

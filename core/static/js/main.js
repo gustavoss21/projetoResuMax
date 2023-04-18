@@ -56,6 +56,7 @@ function loadFolhaModo() {
 }
 
 criaElementoFolha()
+console.log(lista_Quill)
 loadFolhaModo()
 loadFilter()
 adicionaFucaoTextoToolbar()
@@ -97,15 +98,6 @@ btn_salvar_conteudo.addEventListener('click', function () {
         }
     }
     salvarConteudo()
-    // return location.reload()
+    return location.reload()
 
-})
-
-function maisFolha() {
-    
-}
-btn_mais_folha.addEventListener('click', () => {
-    // let nova_folha = novaFolha(true)
-    num_pagina = 5
-    // setTextSheet(nova_folha,true)
 })

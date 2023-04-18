@@ -1,12 +1,12 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
 
 class ConteudoModel(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     id = models.BigAutoField(primary_key=True)
     conteudo = models.TextField()
     tema = models.TextField(blank=True)
-    input_file = models.FileField(upload_to='input_file', blank=True)
-    summany_file = models.FileField(upload_to='summany_file', blank=True)
     conteudo_pdf = models.FileField(upload_to='conteudo_pdf', blank=True)
 
     def __str__(self):
@@ -18,6 +18,7 @@ class ConteudoModel(models.Model):
 
 
 class SubtemaModel(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     subtema = models.TextField(blank=True)
     index = models.IntegerField()
     tamanho = models.IntegerField()
@@ -29,6 +30,7 @@ class SubtemaModel(models.Model):
 
 
 class TopicoModel(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     topico = models.TextField(blank=True)
     index = models.IntegerField()
     tamanho = models.IntegerField()
@@ -40,6 +42,7 @@ class TopicoModel(models.Model):
 
 
 class DestaqueModel(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     destaque = models.TextField(blank=True)
     index = models.IntegerField()
     tamanho = models.IntegerField()
@@ -51,6 +54,7 @@ class DestaqueModel(models.Model):
 
 
 class ImportanteModel(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     importante = models.TextField(blank=True)
     index = models.IntegerField()
     tamanho = models.IntegerField()

@@ -15,8 +15,8 @@ var modo_leitura = false
 var interador_folha = 0
 let lista_conteudo = ''
 let render_start = false
-let num_pagina = 5
-
+let mais_folha = false
+let paginas = 5
 
 //faz com que o dropdown nao suma ao clicar no item
 $("#bloco-right").on('click', '.dropdown-item', function (event) { event.stopPropagation(); });
@@ -192,21 +192,23 @@ function desativaModoLeitura() {
 async function setTextSheet(folha, nova_folha) {
     folhas_renderizadas = true
     render_start = true
-    num_pagina--
-    
-    
+    paginas--
     if (!nova_folha) {
         lista_conteudo = await mixinsetTextSheet()
-        console.log(lista_conteudo)
+        // console.log(lista_conteudo)
         // folha.appendChild(lista_conteudo[0])
     }
 
-    folha.innerHTML = lista_conteudo
+    // folha.innerHTML = lista_conteudo
+    console.log('textoss')
+    folha.parentElement.__quill.pasteHTML(lista_conteudo)
+    // console.log(lista_conteudo)
     lista_conteudo = ''
 
     if (folha.offsetHeight < folha.scrollHeight) {
         lista_conteudo = desceTextoFolha(folha)
-        if (num_pagina < 0) {
+        if (mais_folha || paginas<1) {
+            console.log(mais_folha + 11111111111)
             let elemento_mais_folha = document.querySelector('#maisfolha')
             elemento_mais_folha.style.display = 'block'
             return
@@ -216,7 +218,8 @@ async function setTextSheet(folha, nova_folha) {
     }
 
     render_start = false
-    getSelecao()
+
+    getSelecao()//só execultar após renderizar folha
 }
 /**
  *define o conteudo que sera renderizado
@@ -263,8 +266,9 @@ function mixinDesceTexto(folha) {
 
                     continue
                 }
-                let index_pass = folha.innerHTML.indexOf(p.outerHTML)
-                lista_passou = folha.innerHTML.slice(index_pass,)
+                let index_pass = [...folha.children].indexOf(p)
+                lista_passou = [...folha.children].slice(index_pass,)
+                lista_passou = (lista_passou.map(htmlToString)).join('')
                 break
                 
             }
@@ -279,13 +283,20 @@ function mixinDesceTexto(folha) {
     
 //     
 }
+
+function htmlToString(html) {
+    return html.outerHTML
+}
+
 function desceTextoFolha(folha) {
     let elementos_passou = mixinDesceTexto(folha)//paragrafos(ultimos,primeiro)
     let elemento = folha.lastElementChild
     let conteudo_quebra
     let height_folha = folha.offsetHeight
-    let contador = 0
-    let texto = (elemento.innerText).split(' ')  
+    let texto = (elemento.textContent).split(' ')  
+    let index_range = folha.textContent.length - elemento.textContent.length
+    let text_end = ''
+
     let index 
 
     if (texto[0] == "\n" && texto.length < 1) {
@@ -293,24 +304,34 @@ function desceTextoFolha(folha) {
 
     }
     for (index = texto.length; index > 0; index--) {
-        contador--
         let height_p = folha.lastChild.offsetHeight
         let posicion_p = folha.lastChild.offsetTop
         let posicion_and = height_p+posicion_p
-        if(!texto[index])continue
-        if (posicion_and+10 > height_folha) {
-            let text_start = texto.slice(0, index)
-            elemento.innerText = text_start.join(' ')
-        } else{ break}
+        if (!texto[index]) continue
+        index_range += texto[index].length + 1
+        if (posicion_and + 10 > height_folha) {
+            let text_start = texto.slice(0, index).join(' ')
+            // let text_p = text_start.join(' ')
+            // let selec = folha.parentElement.__quill.
+            let format = folha.parentElement.__quill.getFormat(index_range, texto[index].length)
+            text_end = setTextToElementHtml(format,texto[index], text_end)
+            // conteudo_quebra = `<p>${text_end.join(' ')}</p>`
+            // text_start = elemento.innerHTML.replace(texto[index],'')
+            elemento.innerHTML = text_start
+            // elemento.innerText = text_start
+        } else {
+            
+            break
+        }
     }
 
     // conteudo_quebra = (texto.slice(indice_fim,)).join(' ')
+    // folha.__quill.getFormat(folha)
 
-    let text_end = texto.slice(index + 1,)
-    conteudo_quebra = `<p>${text_end.join(' ')}</p>`
+
     if (!elementos_passou) elementos_passou = ''
 
-    return conteudo_quebra + elementos_passou
+    return text_end + elementos_passou
 }
 function mixinSobeTexto(folha,folha2) {
     let folha_altura = folha.offsetHeight
@@ -493,21 +514,21 @@ function SeMudanca(cont) {
 
         }
 
-    } else {
+    }// else {
         /*
         * se no final da 1° folha ter espaço para mais conteudo, entao
         * os paragrafos da 2° folha seram usados para preencher o espaço
         */
-        if (folhas[cont + 1]) {
-            for (let elementos of folhas[cont+1].children) {
-                if (elementos.innerText.length > 1) {
-                    return distrubuirTextoQuebra(folhas[cont], folhas[cont + 1])
+    //     if (folhas[cont + 1]) {
+    //         for (let elementos of folhas[cont+1].children) {
+    //             if (elementos.innerText.length > 1) {
+    //                 // return distrubuirTextoQuebra(folhas[cont], folhas[cont + 1])
             
-                }
+    //             }
 
-            }
-        }
-    }
+    //         }
+    //     }
+    // }
 
 }
 
@@ -559,6 +580,31 @@ function primeiroParagrafoFolha() {
         }
 }
 
+async function getMaisFolha(){
+    const response = await fetch('/mais-folhas/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        },
+    })
+    const customer = response.json()
+    console.log(customer)
+    return customer
+}
+
+// btn_mais_folha.addEventListener('click', () => {
+//     let objet_list = getMaisFolha()
+//     let texto = objet_list['conteudo']
+//     console.log(texto)
+//     lista_conteudo = pdfAdd(texto)
+//     mais_folha = objet_list['mais_folha']
+//     console.log(mais_folha)
+
+//     let nova_folha = novaFolha(true)
+//     setTextSheet(nova_folha, true)
+
+// })
+
 body.onresize = () => {
     let folha = document.querySelector('.ql-editor')
     defineTamanhoFolha(folha)
@@ -569,3 +615,38 @@ input_range.addEventListener('click', function () {
 })//definirar novas dimençoes da folha
 btn_leitura.addEventListener('click', modoLeitura)//define se a folha é editavel
 
+function setTextToElementHtml(format = false, text = '', html = '') {
+    if (!(Object.values(format).length > 0)) format = false
+    let element = html
+    let pathern = /(.*?;)(">.*)/g
+    let patthern_link = /(<p.*?>)(.*)/g
+    let pattern_txt = /(.*?>(<a.*?>)?)(.*(<\/a>)?<\/p>)/g
+    // let pattern_link_exits = /(.+ )(href=".*?")(.+)/g
+    for (let attribute of Object.getOwnPropertyNames(format)) {
+        if (element) {
+            if (attribute === 'link') {
+                if (element.search(format[attribute]) != -1) {
+                    continue
+                }
+                element = element.replace(patthern_link, '$1' + `<a href="${format[attribute]}"></a>` + '$2')
+            } else {
+                element = element.replace(pathern, '$1' + attribute + `:${format[attribute]};` + '$2')
+            }
+        } else {
+            element = attribute === 'link' ? `<p><a href="${format[attribute]}"></a></p>` : `<p style="${attribute}:${format[attribute]};"></p>`
+
+        }
+    }
+    if (!format) {
+        if (html) {
+            let pattern = /(<p.*)(<\/p>)/
+            element = element.replace(pattern, '$1 ' + text + '$2')
+        } else {
+            element = `<p>${text}</p>`
+        }
+    } else {
+        element = element.replace(pattern_txt, '$1' + text + ' $3')
+
+    }
+    return element
+}
