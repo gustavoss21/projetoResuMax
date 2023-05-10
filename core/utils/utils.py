@@ -20,12 +20,10 @@ def apagarPdf(caminho_completo):
 
  
 def text_extract(diretorio,index=15):
-    # print(diretorio.name)
 
     type = diretorio.name[-3:]#
     text = ''
     last_page = False
-    # print(type(1111,diretorio))
 
     if type == 'txt':
         try:
@@ -38,7 +36,6 @@ def text_extract(diretorio,index=15):
         # with open(diretorio.name, 'rb') as file:
         try:
             read_pdf = PyPDF2.PdfReader(diretorio)
-            print(11111,index)
             count_page = len(read_pdf.pages)
             if count_page <= index:
                 index = count_page
@@ -46,7 +43,6 @@ def text_extract(diretorio,index=15):
 
             page = read_pdf.pages[0:index]
 
-            print(33333,count_page)
             for p in page:
                 text += p.extract_text()
         except:

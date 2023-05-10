@@ -79,13 +79,15 @@ WSGI_APPLICATION = 'resumax.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
+# banco de dados local
+"""DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-}
-"""DATABASES = {
+}"""
+# banco de dados server
+DATABASES = {
     'default': {
         'ENGINE': os.getenv('ENGINE'),
         'NAME': os.getenv('NAME'),
@@ -94,7 +96,7 @@ DATABASES = {
         'HOST': os.getenv('HOST'),
         'PORT': os.getenv('PORT'),
     }
-}"""
+}
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 

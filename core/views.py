@@ -196,7 +196,6 @@ class GetSheetData(View):
         if usuario.is_authenticated:
             conteudo = dados(
                 ConteudoModel.objects.filter(user=request.user.id))
-            print(ConteudoModel.objects.filter(user=request.user.id))
             if len(conteudo) == 0:
                 return HttpResponse(json.dumps('vazio'))
             
