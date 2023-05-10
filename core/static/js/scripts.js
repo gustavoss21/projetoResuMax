@@ -14,7 +14,6 @@ var conta_folha = 0
 var modo_leitura = false
 var interador_folha = 0
 let lista_conteudo = ''
-let render_start = false
 let mais_folha = false
 let paginas = 5
 
@@ -189,35 +188,39 @@ function desativaModoLeitura() {
  * @param {*} nova_folha 
  * @returns novaFolha()
  */
-async function setTextSheet(folha, nova_folha) {
+async function setTextSheet(folha, nova_folha,set_end) {
+    let position_comand = ['append','prepend']
     folhas_renderizadas = true
-    render_start = true
     paginas--
+    
     if (!nova_folha) {
         lista_conteudo = await mixinsetTextSheet()
-        // console.log(lista_conteudo)
-        // folha.appendChild(lista_conteudo[0])
+    }
+    if(!(set_end===undefined)){
+        set_end ? $(folha).append(lista_conteudo):$(folha).prepend(lista_conteudo)
+    }else{
+        $(folha).html(lista_conteudo)
     }
 
-    // folha.innerHTML = lista_conteudo
-    console.log('textoss')
-    folha.parentElement.__quill.pasteHTML(lista_conteudo)
     // console.log(lista_conteudo)
     lista_conteudo = ''
 
     if (folha.offsetHeight < folha.scrollHeight) {
-        lista_conteudo = desceTextoFolha(folha)
-        if (mais_folha || paginas<1) {
-            console.log(mais_folha + 11111111111)
-            let elemento_mais_folha = document.querySelector('#maisfolha')
-            elemento_mais_folha.style.display = 'block'
-            return
+        lista_conteudo = downText(folha)
+        // if (mais_folha || paginas<1) {
+        //     console.log(mais_folha + 11111111111)
+        //     let elemento_mais_folha = document.querySelector('#maisfolha')
+        //     elemento_mais_folha.style.display = 'block'
+        //     return
+        // }
+        let folha_index = ($('.ql-editor').index(folha))+1
+        let next_sheet = $('.ql-editor')[folha_index]
+        if(next_sheet){
+            return setTextSheet(next_sheet,true,false)
         }
         folha = novaFolha(true)
         return setTextSheet(folha, true)
     }
-
-    render_start = false
 
     getSelecao()//só execultar após renderizar folha
 }
@@ -227,7 +230,7 @@ async function setTextSheet(folha, nova_folha) {
  */
 async function mixinsetTextSheet() {
     if (text_pdf) {
-        renderiza_pdf = true
+        // renderiza_pdf = true
         return pdfAdd(text_pdf)
     }
 
@@ -251,11 +254,11 @@ function mixinDesceTexto(folha) {
     let lista_passou
     let new_text = ''
     let pass = 1
-
+    let position_and = 0
     for( let p of folha.childNodes){
         let position_p = p.offsetTop
         let height_p = p.offsetHeight
-        let position_and = position_p + height_p
+        position_and += height_p
 
         if (position_and + 10 > folha.offsetHeight) {
 
@@ -288,63 +291,124 @@ function htmlToString(html) {
     return html.outerHTML
 }
 
-function desceTextoFolha(folha) {
-    let elementos_passou = mixinDesceTexto(folha)//paragrafos(ultimos,primeiro)
-    let elemento = folha.lastElementChild
-    let conteudo_quebra
-    let height_folha = folha.offsetHeight
-    let texto = (elemento.textContent).split(' ')  
-    let index_range = folha.textContent.length - elemento.textContent.length
-    let text_end = ''
-
+function downText(folha) {
+    let paragraphs_down = mixinDesceTexto(folha) || ''//paragrafos(ultimos,primeiro)
+    let last_paragraph = folha.lastElementChild
+    if(last_paragraph.innerText.length <= 2 ) return paragraphs_down
+    let height_sheet = folha.offsetHeight
+    let list_txt_last_p = geraListaInnerHTML(last_paragraph.innerHTML)
+    let inner_html_down = ''
     let index 
-
-    if (texto[0] == "\n" && texto.length < 1) {
-        return false
-
-    }
-    for (index = texto.length; index > 0; index--) {
+    const inht = last_paragraph.innerHTML
+ 
+    let inner_html_last_p
+    let tags_close_list = []
+    // let pathern_open_tag = /(<[^\/].*?>)/g
+    // let p_abertura = pathern_open_tag.exec(elemento.outerHTML)[0]
+    for (index = list_txt_last_p.length-2; index >= 0;) {
         let height_p = folha.lastChild.offsetHeight
         let posicion_p = folha.lastChild.offsetTop
-        let posicion_and = height_p+posicion_p
-        if (!texto[index]) continue
-        index_range += texto[index].length + 1
-        if (posicion_and + 10 > height_folha) {
-            let text_start = texto.slice(0, index).join(' ')
-            // let text_p = text_start.join(' ')
-            // let selec = folha.parentElement.__quill.
-            let format = folha.parentElement.__quill.getFormat(index_range, texto[index].length)
-            text_end = setTextToElementHtml(format,texto[index], text_end)
-            // conteudo_quebra = `<p>${text_end.join(' ')}</p>`
-            // text_start = elemento.innerHTML.replace(texto[index],'')
-            elemento.innerHTML = text_start
-            // elemento.innerText = text_start
-        } else {
+        let posicion_end = height_p+posicion_p
+
+        if (!list_txt_last_p[index]){
+            index -= 2
+            list_txt_last_p.splice(index,2)
+
+            continue
+        }
+        
+        // index_range += palvra1_palvra2.length
+        if (posicion_end > height_sheet) {
+            let text_end = (list_txt_last_p.splice(index,2)).join(' ')
+            let tag_closed_found = /<\/.*>/.exec(text_end)
+            let tag_open_found = /<[^\/](\S+).*?>/.exec(text_end)
+            // gerencia as apertura e fechamento de tags
+            if (tag_closed_found){
+                 tags_close_list.push(tag_closed_found[0])
+            }
+            else if(tag_open_found){
+                tags_close_list.pop()
+            }
+            // define o texto quebra
+            inner_html_down = text_end+' '+ inner_html_down
+
+            //adiciona o novo paragrafo atualizado, com todas as abertura e fechamento de tags
+            if(list_txt_last_p.length === 1){
+                let last_word = list_txt_last_p[0]
+                inner_html_down = last_word+' '+ inner_html_down
+                last_paragraph.remove()
+            }
+            inner_html_last_p = list_txt_last_p.join(' ')
+            $(last_paragraph).html(inner_html_last_p)
             
+
+            // last_paragraph = folha.lastChild
+            index -= 2
+        } else {
+            if(inner_html_down.length < 1) return paragraphs_down
             break
         }
     }
 
-    // conteudo_quebra = (texto.slice(indice_fim,)).join(' ')
-    // folha.__quill.getFormat(folha)
+    // pega somente o 1° item da tag_list de fechamento e procura sua abartura
+    inht
+    // let tag_open = tags_close_list.length >= 1 ? tags_close_list.join(''): ''
+    // inner_html_down = tag_open+inner_html_down
+    if(tags_close_list.length > 0) {
+        let tag = tags_close_list[0].slice(2,-1)
+        let pathern = `(?<abertura><${tag}.*?>)`
+        const re = new RegExp(pathern);
+        let tag_open = inner_html_last_p.match(re)
+        tag_open = tag_open? tag_open.groups.abertura:''
+        inner_html_down = tag_open + inner_html_down
+    }
 
-
-    if (!elementos_passou) elementos_passou = ''
-
-    return text_end + elementos_passou
+    let first_paragraph = last_paragraph.cloneNode()
+    first_paragraph.innerHTML = inner_html_down
+    return first_paragraph.outerHTML+paragraphs_down
 }
+function geraListaInnerHTML(html){
+    let pathern =  /(<.+?>)/g
+    let lista = (html.split(pathern))
+    // console.log(lista)
+    for (let index=0; index < lista.length; index++){
+        index = parseInt(index)
+        
+        if(!pathern.exec(lista[index])){
+            if(lista[index].length < 1){
+                lista.splice(index,1)
+                index --
+                continue
+            }
+            // remove space on both sides of strings
+            lista[index] = lista[index].trim()
+             
+            let novo_element = lista[index].split(' ')
+            lista.splice(index,1,...novo_element)
+            index += novo_element.length 
+        }
+
+    }
+    return lista
+}
+
 function mixinSobeTexto(folha,folha2) {
     let folha_altura = folha.offsetHeight
-    let altura_elemento = folha.lastElementChild.offsetHeight
-    let posicao_final = folha.lastElementChild.offsetTop + altura_elemento
-    let space_to_elements = folha_altura - posicao_final
-
-    for (let elemeno of folha2.children) {
-        let elementos_altura = elemeno.offsetHeight
-        if (elementos_altura <= space_to_elements) {
-            let new_elemeto = elemeno.cloneNode(true)
-            folha.appendChild(new_elemeto)
-            elemeno.remove()
+    let ultimo_p_folha1 = folha.lastElementChild
+    let ultimo_p_altura_folha1 = ultimo_p_folha1.offsetHeight
+    let ultimo_p_posicao_folha1 = ultimo_p_folha1.offsetTop
+    let espaco_usado_folha1 = ultimo_p_altura_folha1 + ultimo_p_posicao_folha1
+    let space_to_elements = folha_altura - espaco_usado_folha1
+    let children_folha2 = folha2.children
+    for (let index = 0; index < children_folha2.length;) {
+        let elemento = children_folha2[index]
+        let elemento_altura = elemento.offsetHeight
+        if (elemento_altura <= space_to_elements) {
+            let new_elemeto = elemento.outerHTML
+            $(folha).append(new_elemeto)
+            space_to_elements -= elemento_altura
+            elemento.remove()
+            
         } else {
             return
         }
@@ -353,65 +417,64 @@ function mixinSobeTexto(folha,folha2) {
 function sobeTextoFolha(folha, folha2) {
     //preenche espaco vazio de uma folha com texto da folha seguite.
     mixinSobeTexto(folha,folha2)
-    let padi = parseFloat(window.getComputedStyle(folha.parentNode).paddingTop.slice(0, -2))
+    // se a folha2 estiver sem elementos
     let elemento = folha2.firstChild
     if(!elemento)return
-    let conteudo_quebra
-    let contador = 0
-    let indice_fim
-    let texto = (elemento.innerText).split(' ')
-    let for_texto
-    let posicao_ultimo_paragrafo = folha.lastChild.offsetTop + folha.lastChild.offsetHeight - padi
-    let novo_elemento
-    // verificar se é util
-    if (texto[0] == "\n") {
-        elemento.remove()
-        return false
-    }
+    if(elemento.innerText.length <= 1)elemento.remove()
+    let new_element = elemento.cloneNode(true)
+    new_element.innerHTML = ''
+
+    let ultimo_txt_removido = ''
+    let list_text_p = geraListaInnerHTML(elemento.innerHTML)
+    let inner_html_last_p = ''
+
     //vai dar um for com o primeiro paragrafo da 2º folha
-    for (let indice = 0; indice < texto.length; indice++) {
-        contador++
+
+    for (let index = 0; index < list_text_p.length;) {
+        
         //cada palavra do paragrafo e adiciona na 1º folha ate sua altura maxima
+        
         if (folha.scrollHeight === folha.offsetHeight) {
-            indice_fim = contador
-            for_texto = texto.slice(0, contador)
-            for_texto = (for_texto.join(' ')).toString()
-            let texto_node = document.createTextNode(for_texto)
-  
-            if (contador === 1) {
-                novo_elemento = document.createElement('p')
-                novo_elemento.setAttribute('class', 'teste')
-                novo_elemento.appendChild(texto_node)
-
-            } else {
-                novo_elemento.remove()
-                novo_elemento = document.createElement('p')
-                novo_elemento.setAttribute('class', 'teste')
-                novo_elemento.appendChild(texto_node)
-
-            }
-            folha.appendChild(novo_elemento)
+            let text_slice = (list_text_p.splice(index,2)).join(' ')
+            ultimo_txt_removido = text_slice+ ' '
+            inner_html_last_p += ultimo_txt_removido
+            new_element.innerHTML = inner_html_last_p
 
         } else {//acerta a altura caso tenha passado.
-            posicao_ultimo_paragrafo = folha.lastChild.offsetTop + folha.lastChild.offsetHeight - padi
-            if (posicao_ultimo_paragrafo > folha.offsetHeight) {
-                var teste = desceTextoFolha(folha)    
-            }
+  
+            new_element.innerHTML = new_element.innerHTML.replace(ultimo_txt_removido,'')//talves o ultimo_txt_removido seja uma teg
+            let inner_html_first_p = list_text_p.join(' ')
 
+            let tag_open = colocoTagOpen(inner_html_first_p,inner_html_last_p)
+            
+            inner_html_first_p = tag_open + ultimo_txt_removido + inner_html_first_p
+            elemento.innerHTML = inner_html_first_p
             break
         }
 
     }
-
-    if (contador === texto.length && contador > 1 | !teste) {//se adicionol o texto todo, return false
-        elemento.remove()
-        return false
+    if(new_element.innerText.length < 1){
+        new_element.remove()
     }
-   
-    conteudo_quebra = (texto.slice(indice_fim,)).join(' ')
-
-    return teste + ' ' + conteudo_quebra
 }
+function colocoTagOpen(inner_html_first_p,inner_html_last_p){
+    let pathern_tag_close = /<\/\S+>/
+    let match_found = inner_html_first_p.match(pathern_tag_close)
+    let tag_open = ''
+    if(!match_found) return tag_open
+    for(let tag of match_found){
+        let nome_tag = tag.slice(2,-1)   
+        let pathern = new RegExp(`(?<open_tag><${nome_tag}.*?>).+(?!</${nome_tag}>)`)
+        let resultado_match = pathern.exec(inner_html_last_p)
+
+        if(resultado_match){
+            tag_open += resultado_match.groups.open_tag
+        }
+    }
+    
+    return tag_open
+}
+
 function verificarParagrafo(paragrafos) {
     let p_boolean = false
 
@@ -435,17 +498,19 @@ function verificarParagrafo(paragrafos) {
 function novaFolha(renderia_conteudo=false,page_break,indece_folha) {
     const nova_folha = document.createElement('div')
     nova_folha.setAttribute('class', 'editor')
+    //define a ordem da nova folha
     if (indece_folha) {
         bloco_center.insertBefore(nova_folha,bloco_center.children[indece_folha])
     } else {
         bloco_center.appendChild(nova_folha) //#### teste(descomentar)
     }
     criarQuill(nova_folha)
+    
     if (page_break) {
         let new_p = document.createElement('p')
         new_p.setAttribute('class', 'page')
     }
-     
+    //-------------------------------------\\
     ajustaAlturaFolha(nova_folha)//ajusta dimensoes da folha
     adicionaFucaoTextoToolbar()//adiciona os filtros na toolbar da folha
     // definicoesSelecaoTexto()
@@ -461,25 +526,21 @@ function distrubuirTextoQuebra(folha1, folha2) {
     let posicao_ultimo_paragrafo = ultimo_elemento.offsetTop + ultimo_elemento.offsetHeight - padi
     if (posicao_ultimo_paragrafo + 10 < folha1.offsetHeight) {
         //preencherá o espaço da 1º folha e retorna o que nao couber mais
-        let texto_resto_quebra = sobeTextoFolha(folha1, folha2)
+        sobeTextoFolha(folha1, folha2)
+        // let texto_resto_quebra = sobeTextoFolha(folha1, folha2)
         //significa que coube tudo na 1° folha
-        if (texto_resto_quebra) {
-         //define o restante que sobrou
-            folha2.firstChild.innerText = texto_resto_quebra
-        }
+        // if (texto_resto_quebra) {
+        //  //define o restante que sobrou
+        //     folha2.firstChild.innerText = texto_resto_quebra
+        // }
     }
     posicao_ultimo_paragrafo = ultimo_elemento.offsetTop + ultimo_elemento.offsetHeight - padi
-    render_start = false //para o seMunda ativar 
 }
 
 function SeMudanca(cont) {
-    if (render_start) return
-
     let folhas = document.querySelectorAll('.ql-editor')
     let alturaMax = folhas[cont].offsetHeight
     let altura_scroll = folhas[cont].scrollHeight
-    let contador = 0
-    let paragrafo_passou = []
     let texto
     console.log('se mudanca')
     /**
@@ -494,21 +555,18 @@ function SeMudanca(cont) {
        
         if (alturaMax < altura_scroll) {
             //adiciona paragrafo à lista
-            texto = desceTextoFolha(folhas[cont])
+            texto = downText(folhas[cont])
             if (texto) {
-
+                let folha
                 if (folhas[cont + 1]) {
-                    let html_folha = folhas[cont + 1].innerHTML
-                    folhas[cont + 1].innerHTML = texto
-                    folhas[cont + 1].innerHTML += html_folha
-                    
+                    folha = folhas[cont + 1]
+            
                 } else {
-                        
-                    lista_conteudo += texto
-                    let folha = novaFolha(true)
-                    setTextSheet(folha,true)
-
+                    folha = novaFolha(true)
                 }
+                lista_conteudo += texto
+                setTextSheet(folha,true,false)
+                return
 
             }
 
@@ -534,29 +592,30 @@ function SeMudanca(cont) {
 
 function apagaEQuebra(evt,indece) {
     let folhas = document.querySelectorAll('.ql-editor')
-    let texto_resto_quebra
+    // let texto_resto_quebra
 
-    texto_resto_quebra = sobeTextoFolha(folhas[indece - 1], folhas[indece])
+    sobeTextoFolha(folhas[indece - 1], folhas[indece])
+    // texto_resto_quebra = sobeTextoFolha(folhas[indece - 1], folhas[indece])
 
-    if (texto_resto_quebra) {
-        folhas[indece].firstChild.innerText = texto_resto_quebra
-    }
+    // if (texto_resto_quebra) {
+    //     folhas[indece].firstChild.innerText = texto_resto_quebra
+    // }
 }
 
-function setCursor(node, posicao) {
+function setCursor(node) {
 
-    if (!(node && posicao)) {
+    if (!(node)) {
         console.log('node ou posicao nao foi passado!')
         return
     }
     node.focus()
     var range = document.createRange();
-    range.setStart(posicao, 1)
+    range.setStart(node,0)
 
     var sel = window.getSelection();
     sel.removeAllRanges();
+    // range.selectNode(node);
     sel.addRange(range);
-
 }
 
 function primeiroParagrafoFolha() {
@@ -616,7 +675,8 @@ input_range.addEventListener('click', function () {
 btn_leitura.addEventListener('click', modoLeitura)//define se a folha é editavel
 
 function setTextToElementHtml(format = false, text = '', html = '') {
-    if (!(Object.values(format).length > 0)) format = false
+    let format_length = Object.values(format).length
+    if (!(format_length > 0)) format = false
     let element = html
     let pathern = /(.*?;)(">.*)/g
     let patthern_link = /(<p.*?>)(.*)/g
@@ -639,7 +699,7 @@ function setTextToElementHtml(format = false, text = '', html = '') {
     }
     if (!format) {
         if (html) {
-            let pattern = /(<p.*)(<\/p>)/
+            let pattern = /(<p.*?>)(.*<\/p>)/
             element = element.replace(pattern, '$1 ' + text + '$2')
         } else {
             element = `<p>${text}</p>`

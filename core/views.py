@@ -58,7 +58,7 @@ class HomeView(TemplateView):
             conteudo[0].save()
             request.session['pagina'] = 15
             request.session.save()
-        print(request.session.get('pagina'))
+    
         return render(request,'index.html',context)
 
       
@@ -96,7 +96,7 @@ class SalvarConteudo(View):
                 request.session.save()
             return HttpResponse(json.dumps({'redirect': 'usuario/login'}))
         artigo = ConteudoModel.objects.all()
-        resultado = artigo.get_or_create(id=1, user=request.user)
+        resultado = artigo.get_or_create(user=request.user)
         resultado[0].conteudo = dados.get('conteudo')
         resultado[0].save()
         return HttpResponse('1')
@@ -196,6 +196,7 @@ class GetSheetData(View):
         if usuario.is_authenticated:
             conteudo = dados(
                 ConteudoModel.objects.filter(user=request.user.id))
+            print(ConteudoModel.objects.filter(user=request.user.id))
             if len(conteudo) == 0:
                 return HttpResponse(json.dumps('vazio'))
             
@@ -215,8 +216,6 @@ class MaisFolhas(View):
         conteudo = ConteudoModel.objects.filter(user=self.request.user.id)
         file = conteudo[0].conteudo_pdf
         pagina = request.session.get('pagina')
-        print(4444,file)
-        print(5555,dir(file))
         intense_file = utils.text_extract(file.file, pagina)
         if not intense_file:
             return redirect('home')

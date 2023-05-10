@@ -1,13 +1,2 @@
-proximo passo, bservar o comportamento do sobtexto
-
-
-obter de uma vez a expressao da ultima palavra
-(<p.*?>)((<(.*?)\s.*?>)*(.*?)(<\/\4>)?)(<\/p>)v1.0
-
-let regex = (<p.*?>)(.*?)(\S*(\s(\S)*)(\s)?)((<\/.*?>)?(<\/p>)) //v2.0
-ex: string.replace(regex,'$1'+'$3'+$4)
-
-//obtem se ter um outroelemento encapsulando-o
-<p.*?>(<(.*?)(\s.*?)?>)?.*?\s(\S*\s.*?)(<\/\2>)?<\/p> 
-
-//obtem as duas ultimas palavras com as tags de fechamento,exceto </p>
+lista = ('<p>','<em>','</em>','</p>')
+console.log(lista)

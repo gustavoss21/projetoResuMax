@@ -10,3 +10,4 @@ migrations
 node_modules/
 media/
 env/
+test.js

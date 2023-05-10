@@ -1,6 +1,4 @@
 let clicked_tecla = false
-let btn_salvar_conteudo = document.querySelector('#btn-salvar-conteudo')
-let renderiza_pdf = false
 let script_text = document.getElementById('date-input')
 let folhas_renderizadas = false
 let btn_mais_folha = document.querySelector('#maisfolha')
@@ -62,13 +60,6 @@ loadFilter()
 adicionaFucaoTextoToolbar()
 setBotao()//salva os tipos de texto
 
-document.addEventListener('keydown', btn => {
-    let list_btn = ['Delete', 'ArrowUp', 'Backspace', 'ArrowDown','Enter']
-    if (list_btn.indexOf(btn.key) === -1)return
-
-    clickedTecla(btn)
-})
-
 definicoesSelecaoTexto();//faz atribuiçoes de selecao,para salvar.
 lista_Quill.forEach(element => {
     element.on('selection-change', () => {
@@ -88,15 +79,16 @@ btn_baixar_resumo.addEventListener('click', function () {
 
 checked_filter.addEventListener('click', function () { definicoesFilter() })
 
-btn_salvar_conteudo.addEventListener('click', function () {
-    if (renderiza_pdf) {
-        let confirm = window.confirm('seu arquivo anterior será substituido! ')
-        if (confirm) {
-            renderiza_pdf = false
-        } else {
-            return location.pathname = '/'
+// let btn_salvar_conteudo = document.querySelector('#btn-salvar-conteudo')
+$('#btn-salvar-conteudo').on('click', function () {
+    // if (renderiza_pdf) {
+    let confirm = window.confirm('seu arquivo anterior será substituido! ')
+    if (confirm) {
+        // renderiza_pdf = false
+    } else {
+        return location.pathname = '/'
         }
-    }
+    // }
     salvarConteudo()
     return location.reload()
 

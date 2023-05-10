@@ -215,7 +215,7 @@ function compare(a, b) {
 }
 
 /**
-* responsavel por apagar o text_fucao
+* responsavel por apagar o texte do filtro
 */
 function execultaApagaTexto() {   
     let btn_apaga_texto = document.querySelectorAll('.delete-tex-fucao')
@@ -257,115 +257,123 @@ function clickedTecla(btn) {
     let folhas = document.querySelectorAll('.ql-editor')
 
     if (!cursor.anchorNode) {
-        return
+        return false
     }
-    let folha = cursor.anchorNode.parentElement
+    let cursor_node = cursor.anchorNode
+
+    // certifica que o cursor_node seja um paragrafo
+    if (cursor_node.nodeName === '#text') {
+        cursor_node = cursor.anchorNode.parentNode
+    }
+    let folha = cursor_node.parentElement
     let index_folha = [...folhas].indexOf(folha)
     if (index_folha === -1) {
-        folha = cursor.anchorNode.parentElement.parentElement
+        folha = cursor_node.parentElement.parentElement
         index_folha = [...folhas].indexOf(folha)
 
     }
 
     let getSeletor = lista_Quill[index_folha]
-    if (!getSeletor) return
-    getSeletor = getSeletor.getSelection()
-    let index = getSeletor.index
-    folhas = document.querySelectorAll('.ql-editor')
-    clicked_tecla = false
-    // sobe o cursor e, caso necessario, textos tambem
-    if (folhas[index_folha - 1]) {
-        if (index === 0) {
-            const elemeno = folhas[index_folha - 1].lastChild
+    if (!getSeletor) return false
 
-            if (btn.key == 'ArrowUp') {
-                setCursor(folhas[index_folha - 1], elemeno)
-                clicked_tecla = true
-                return clicked_tecla
-            } else if (btn.key == 'Backspace') {
-                if (!(folhas[index_folha].innerText.length > 1)) {
-                    setCursor(folhas[index_folha - 1], elemeno)
-                    folhas[index_folha].parentElement.remove()
-                    lista_Quill.splice(index_folha,1)
-                    return
-                }
-                apagaEQuebra(btn, index_folha)
-                setCursor(folhas[index_folha - 1], elemeno)
-                clicked_tecla = true
-                return clicked_tecla
+    getSeletor = getSeletor.getSelection()
+    let index_seletor = getSeletor.index
+    if(btn === 'controlV'){
+        SeMudanca(index_folha)
+        
+    }else if (btn.key === 'Enter') {
+        //desce texto que passar 
+        if(folha.offsetHeight < folha.scrollHeight){
+            let seletor
+            let seletor_p
+            let func_seletor = ()=>{
+                seletor = window.getSelection()
+                seletor_p = seletor.anchorNode
             }
+            func_seletor()
+            
+            //certifica que o seletor_p é um parágrafo e evitar obter #text no lugar de <p>
+            seletor_p = seletor_p.nodeName == 'P'? seletor_p:seletor_p.parentNode
+            let proxima_folha = folhas[index_folha+1]
+
+            if(seletor_p === folha.lastChild){
+                if(!proxima_folha){
+                    proxima_folha = novaFolha(true)
+                    
+                }
+                let last_paragraph = folha.lastElementChild
+                $(proxima_folha).prepend(last_paragraph.outerHTML)
+                last_paragraph.remove()
+                // lista_Quill[index_folha+1].setSelection(1,0,'api')
+                setCursor(proxima_folha.firstChild)
+                return
+            }
+            if (!proxima_folha) {
+                proxima_folha = novaFolha(true)
+            }
+
+            let elements_down = downText(folhas[index_folha])
+            if (elements_down) {
+                lista_conteudo += elements_down
+                setTextSheet(proxima_folha,true,false)
+                // proxima_folha.innerHTML = elements_down+proxima_folha.innerHTML
+            }
+            seletor_p = folha.children[getSeletor.index]
+            setCursor(seletor_p)
+
         }
         
     }
-    if (folhas[index_folha + 1]){
-        folhas = document.querySelectorAll('.ql-editor')
+    
+    if (index_seletor === 0 && folhas[index_folha - 1]) {
+
+        let elemeno = folhas[index_folha - 1].lastChild
+
+        //sobe o cursor
+        if (btn.key == 'ArrowUp') {
+            setCursor(elemeno)
+            return
+
+        }if (btn.key === 'Backspace') {
+
+            if (!(folha.innerText.length > 1)) {
+                folha.parentElement.remove()//remove folha sem vazio
+                lista_Quill.splice(index_folha,1)//remove quill
+                setCursor(elemeno)
+                return
+            }
+            sobeTextoFolha(folhas[index_folha - 1],folha)
+            elemeno = folhas[index_folha - 1].firstChild
+            setCursor(elemeno)
+
+        }
+        
+    }else {
+        //
+        let proxima_folha = $('.ql-editor')[index_folha + 1]
+        if (cursor_node === folha.lastChild){
         // desce o cursor para o primeiro elemento da pagina seguinte 
-        let cursor_node = cursor.anchorNode
-        if (cursor_node.nodeName === '#text') {
-            cursor_node = cursor.anchorNode.parentNode
-        }
-
-        if (cursor_node === folha.lastChild) {
-
-            if (btn.key === 'ArrowDown') {
-                let elemeno = folhas[index_folha + 1].firstChild
-                clicked_tecla = true
-
-                return setCursor(folhas[index_folha + 1], elemeno)
-
-
-            } else if (btn.key === 'Enter') {
-                let position_p = cursor_node.offsetHeight + cursor_node.offsetTop
-                let folha_height = folhas[index_folha].offsetHeight
-                if (!(position_p + 20 >= folha_height)) {
-                    return
-                }
-                let new_p = document.createElement('p')
-                folhas[index_folha].lastChild.remove()
-                folhas[index_folha + 1].insertBefore(new_p, folhas[index_folha + 1].children[0])
-                clicked_tecla = true
-
-                return setCursor(folhas[index_folha + 1], new_p)
+            if(!proxima_folha){
+                proxima_folha = novaFolha(true)
             }
-        }
-        if (btn.key === 'Enter') {
-            let texto = desceTextoFolha(folhas[index_folha])
-            if (texto) {
-                let html_folha = folhas[index_folha + 1].innerHTML
-                folhas[index_folha + 1].innerHTML = texto+html_folha
-            }
-        }
-        if (btn.key === 'Backspace' || btn.key === 'Delete') {
-            console.log('sobe')
-            let text_p = cursor_node.innerText
-            if (!text_p) {
+            let elemeno = proxima_folha.firstChild
+            
+            // if (btn.key === 'ArrowDown') {
+
+            //     return
+            // } 
+            
+            if (btn.key === 'Backspace') {
                 cursor_node.remove()
             }
-            sobeTextoFolha(folhas[index_folha], folhas[index_folha + 1])
+
+            setCursor(elemeno)
+
+        }else if (btn.key === 'Delete' || btn.key === 'Backspace'){
+            return sobeTextoFolha(folhas[index_folha], proxima_folha)
+            
         }
     } 
-    //adiciona uma nova folha
-    if (btn.key === 'Enter' && cursor.anchorNode === folha.lastChild) {
-        let folha_altura = folha.offsetHeight + folha.offsetTop
-        let posicao_p = folha.lastElementChild.offsetTop
-        let altura_p = folha.lastElementChild.offsetHeight
-        let posicao_final = posicao_p+altura_p
-        if (folhas[index_folha + 1]) {
-            return
-        }
-        if (posicao_final + 20 > folha_altura) {
-    
-            novaFolha()
-            folhas = document.querySelectorAll('.ql-editor')
-            const elemeno = folhas[index_folha + 1].firstChild
-           
-            setCursor(folhas[index_folha + 1], elemeno )
-            clicked_tecla = true
-            return clicked_tecla
-        }   
-    } else if (btn.key === 'Delete'){
-        
-    }
 }
 
 function geraPdf() {
@@ -448,12 +456,13 @@ function activateButton() {
 
     }
 }
-
-let path = location.href
-if (path === 'http://127.0.0.1:8000/adiciona-arquivo/') {
+function btnLeituraActive (){
+    
+    let path = location.href
+    if (path === 'http://127.0.0.1:8000/adiciona-arquivo/') {
     console.log('iguais')
-    btn_leitura.disabled = true
-} else {
-    btn_leitura.disabled = false
-
+        $('#btn-leitura').attr('disabled',true)
+    } else {
+        $('#btn-leitura').attr('disabled',false)
+    }
 }

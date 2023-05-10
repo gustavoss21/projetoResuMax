@@ -42,7 +42,7 @@ function salvarConteudo() {
         return data.json()
     }).then(function (data) {
         if (data.redirect) {
-            location.assign('usuario/login');
+            location.assign('usuario/accounts/login/');
         }
     })
 }
@@ -163,9 +163,11 @@ function criaSeletor() {
 //adiciona caixa_seletor na toolbar
 function adicionaFucaoTextoToolbar() {
     let toolbxx = document.querySelectorAll(".ql-toolbar")
+    console.log(toolbxx)
 
     for (let box of toolbxx) {
         let seltor_existe = box.querySelector('.selecao')
+        box.parentElement.style.zIndex = 1
         if (!seltor_existe) {
             box.appendChild(criaSeletor())
 
@@ -268,15 +270,44 @@ function pdfAdd(data) {
     return palavras.join('')
    
 }
+function control_v(){
+    var ctrl=window.event.ctrlKey;
+    var tecla=window.event.keyCode;
+    
+    if (ctrl && tecla==86) return true
+}
 
 function getSelecao() {
-    for (const elemeno of lista_Quill) {
-        elemeno.on('text-change', function (delta, oldDelta, source) {
-                
-                SeMudanca(lista_Quill.indexOf(elemeno))
-        });
+    let btn_control_v = false
+    document.addEventListener('keydown', btn => {
+        btn_control_v = control_v()
+    })
+    document.addEventListener('keyup', btn => {
+       
+        if(btn_control_v){
+            clickedTecla('controlV')
+            return
+
+        }
+
+        let list_btn = ['Delete', 'ArrowUp', 'Backspace', 'ArrowDown','Enter']
+        console.log(btn.key)
+        if (list_btn.indexOf(btn.key) === -1)return
         
-    }
+        clickedTecla(btn)
+        clicked_tecla = true
+    })
+    let elemento = false
+    // for (const elemeno of lista_Quill) {
+    //     if(elemento) continue
+    //     elemeno.on('text-change', function (delta, oldDelta, source) {
+    //         let folha_index = lista_Quill.indexOf(elemeno)
+    //         let folha = $('.ql-editor')[folha_index]
+    //         if (folha.offsetHeight < folha.scrollHeight)  SeMudanca(folha_index)
+    //         elemento = true
+            
+    //     });
+    // }
 }
 /**
  *  verifica quais filter-text estao vazios e informa
