@@ -1,0 +1,73 @@
+version: "3.4"
+
+services:
+  nginx:
+    build:
+      dockerfile: ./docker/nginx.dockerfile
+      context:  .
+    image: gustavo/nginx_resumax:v1
+    container_name: nginx
+    ports:
+     -  "8000:80"
+    networks:
+     -  nwresumax
+    depends_on:
+     -  resumax1
+     -  resumax2
+     -  resumax3
+
+  pgresumax:
+    build:
+      dockerfile:  ./docker/pgresumax.dockerfile
+      context: .
+    image: gustavo/pgresumax:v1
+    container_name: pgresumax
+    ports:
+      - "5432"
+    networks:
+      - nwresumax
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+    
+  resumax1:
+    build: 
+      dockerfile: ./docker/resumax.dockerfile
+      context: .
+    image: gustavo/resumax:v1
+    container_name: resumax1
+   
+    networks:
+      - nwresumax
+    depends_on:
+      - pgresumax
+  
+  resumax2:
+    build: 
+      dockerfile: ./docker/resumax.dockerfile
+      context: .
+    image: gustavo/resumax:v1
+    container_name: resumax2
+   
+    networks:
+      - nwresumax
+    depends_on:
+      - pgresumax
+  
+  resumax3:
+    build: 
+      dockerfile: ./docker/resumax.dockerfile
+      context: .
+    image: gustavo/resumax:v1
+    container_name: resumax3
+   
+    networks:
+      - nwresumax
+    depends_on:
+      - pgresumax
+
+networks:
+  nwresumax:
+   driver: bridge
+
+volumes:
+  pgdata:

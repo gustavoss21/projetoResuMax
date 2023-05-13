@@ -26,9 +26,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['resumax.online','www.resumax.online','191.101.70.238','127.0.0.1']
+ALLOWED_HOSTS = ['resumax.online','www.resumax.online','191.101.70.238','127.0.0.1',]
 
 
 # Application definition
@@ -89,7 +89,7 @@ WSGI_APPLICATION = 'resumax.wsgi.application'
 # banco de dados server
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('ENGINE'),
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('NAME'),
         'USER': os.getenv('USER'),
         'PASSWORD': os.getenv('PASSWORD'),
@@ -97,7 +97,9 @@ DATABASES = {
         'PORT': os.getenv('PORT'),
     }
 }
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+
+# DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 # Password validation
@@ -137,7 +139,7 @@ TIME_ZONE = 'America/Sao_Paulo'
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MESSAGE_TAGS = {
