@@ -1,2 +1,0 @@
-lista = ('<p>','<em>','</em>','</p>')
-console.log(lista)
