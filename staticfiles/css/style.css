@@ -1,0 +1,303 @@
+/* definiçoes gerais */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #0c0b0b08;
+}
+/* ######################### */
+/* cabecalho */
+header {
+    background: lightblue;
+}
+
+header li:hover {
+    background-color: #5794a8;
+    border-radius: 10px;
+    color: white;
+}
+
+header a:hover {
+    color: white;
+}
+main.row{
+    margin-bottom: 50px;
+}
+
+.navbar-brand {
+    font-size: 3.5em;
+}
+
+.navbar-brand>span {
+    color: red;
+}
+
+/* ######################### */
+/* barra lateral esquerda */
+.barra-lateral-esquerda {
+    color: rgb(0, 0, 0);
+    font-size: 1.2em;
+    padding: 20px 0px 0px 10px;
+    background-color: rgba(173, 216, 230, 0.500);
+    width: 198px;
+    box-sizing: border-box;
+    width: 170px;
+    position: fixed;
+}
+.barra-lateral-esquerda button {
+    min-width: 133px;
+    margin: 0px 0px 10px 11px;
+}
+
+
+.barra-lateral-esquerda .solo:hover {
+    background-color: LightBlue;
+}
+
+.bloco-right li.ol:hover {
+    background-color: rgba(173, 216, 230, 0.494);
+}
+.btn-group ul.dropdown-menu{
+    padding: 5px;
+    width: auto !important;
+}
+.barra-lateral-esquerda i {
+font-size: 18px;
+}
+
+@media (max-width:768px) {
+    .barra-lateral-esquerda {
+        width: 50px;
+        padding: 0;
+    }
+
+    .barra-lateral-esquerda button {
+        min-width: 50px;
+        margin: 0%;
+    }
+    .barra-lateral-esquerda button.btn {
+            border-radius: 0%;
+            box-sizing: border-box;
+            padding: 5px;
+        }
+}
+/* #bloco-right button.dropdown-toggle {
+    margin: 0px 0px 10px 11px;
+    width: 129px;
+    height: 40px;
+    background-color: rgb(87, 148, 168, 0.8);
+} */
+/* ######################### */
+/* conteudo central folha */
+
+.row {
+    width: 100%;
+    margin: initial;
+}
+#conteudo-central {
+    margin-top: 10px;
+    margin-left: 175px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+}
+#bloco-center {
+    position: relative;
+    padding: initial;
+    /* position: static; */
+    /* left: 15px; */
+}
+
+.editor.ql-container {
+    margin-top: 20px;
+    padding: 12% 17.4% !important;
+    box-sizing: border-box;
+    box-shadow: 1px 0px 20px -2px #00000036;
+    background-color: white;
+    font-size: inherit;
+    /* position: initial; */
+}
+
+
+.editor .ql-editor {
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.ql-editor {
+    padding: 0 !important;
+    overflow: hidden;
+    position: relative;
+}
+
+.selecao {
+    padding: 5px;
+    z-index: 5;
+    order: 3;
+    background-color: rgb(192 217 225);
+    border: 1px solid #5794a82b;
+    border-radius: 0px 0px 23px 23px;
+}
+
+.selecao .linha {
+    border-top: 1px solid #5794a8;
+}
+
+.conteudo-selecao {
+    margin: 3px 0px 0px 51px;
+}
+
+.conteudo-selecao div {
+    padding: 3px;
+    color: #086f6f;
+    border-radius: 4px;
+    font-size: 1.6em;
+}
+
+.conteudo-selecao div:hover {
+    color: #fafafa;
+    background-color: hsla(180, 87%, 23%, 0.529);
+}
+
+.title-selecao {
+    font-size: 1.2em;
+    color: black;
+}
+
+#check-li li:hover {
+    background-color: initial;
+}
+#folha-obtida{
+    position: relative;
+    max-width: 80%;
+    margin: auto;
+    box-sizing: border-box;
+}
+.conteinar-tex-funcao{
+    background: #00000063;
+    padding: 37px 10px 10px 10px;
+    border-radius: 10px;
+}
+.text-fucao{
+    display: flex;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+}
+@media (max-width:768px) {
+    #conteudo-central {
+        /* margin: 30px; */
+        margin-left: 60px;
+    }
+}
+#maisfolha{
+    background-color: #0061ff;
+    max-width: 116px;
+    border-radius: 5px 5px 0px 0px;
+    margin: auto;
+    color: white;
+    padding: 5px 10px;
+    display: none;
+}
+#maisfolha:hover{
+    background-color: #033789;
+}
+/* 
+subtema-color: blue
+topico-color: green
+importante-color: red
+destaque-color:yellow
+ */
+.text-destaque,
+.text-importante,
+.text-subtema,
+.text-topico {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: white;
+    box-shadow: 1px 1px 3px #00000052;
+}
+
+.delete-tex-fucao {
+    display: flex;
+    float: right;
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 8px;
+    position: relative;
+    top: -4px;
+    
+}
+
+.delete-tex-fucao:hover {
+    background-color: rgba(0, 0, 0, 0.261);
+    color: white;
+}
+
+.text-subtema {
+    border: 1px solid rgb(0, 0, 255, 0.5);
+}
+
+.text-topico {
+    border: 1px solid rgb(0, 128, 0, 0.5);
+}
+
+.text-importante {
+    border: 1px solid rgb(255, 0, 0, 0.5);
+}
+
+.text-destaque {
+    border: 1px solid rgb(255, 255, 0, 0.5);
+}
+#btn-baixar-resumo {
+    position: relative;
+    top: -28px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #565e64;
+    color: white;
+    font-size: 15px;
+    box-shadow: 5px 2px 8px 0px #0a0a0a4f;
+}
+#btn-baixar-resumo:hover {
+        box-shadow: inset 0px 0px 8px 0px;
+}
+/* ######################### */
+/* barra lateral direita */
+
+
+.barra-folha li:hover {
+    background-color: LightBlue;
+}
+
+.barra-folha .flex-column {
+    width: 210px;
+}
+
+#bloco-right ul.dropdown-menu {
+    width: 236px;
+}
+
+#bloco-right ul.dropdown-menu li {
+    padding: 10px;
+}
+/* ######################### */
+/* range flutuate */
+#tamanho-folha-edit {
+    position: fixed;
+    bottom: 50px;
+    right: 69px;
+    width: 276px;
+}
+/* ######################### */
+/* resposividade */
+
+@media (min-width:992px) {}
+
+@media (max-width:992px) {}
+
+@media (max-width:768px) {}
