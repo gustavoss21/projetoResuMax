@@ -8,7 +8,11 @@ services:
     image: gustavo/nginx_resumax:v1
     container_name: nginx
     ports:
+<<<<<<< HEAD
      -  "80:80"
+=======
+     -  80:80
+>>>>>>> 0fe3f30ecd2ab199537986faae6360ae3304e95d
     networks:
      -  nwresumax
     depends_on:
@@ -49,7 +53,11 @@ services:
     image: gustavo/resumax:v1
     container_name: resumax2
     ports:
+<<<<<<< HEAD
      -  "8000"
+=======
+      -  "8000"
+>>>>>>> 0fe3f30ecd2ab199537986faae6360ae3304e95d
     networks:
       - nwresumax
     depends_on:
@@ -62,7 +70,11 @@ services:
     image: gustavo/resumax:v1
     container_name: resumax3
     ports:
+<<<<<<< HEAD
      -  "8000"
+=======
+     -  "8000"    
+>>>>>>> 0fe3f30ecd2ab199537986faae6360ae3304e95d
     networks:
       - nwresumax
     depends_on:

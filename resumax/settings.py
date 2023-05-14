@@ -28,7 +28,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+<<<<<<< HEAD
 ALLOWED_HOSTS = ['resumax.online','www.resumax.online','localhost','127.0.0.1']
+=======
+ALLOWED_HOSTS = ['resumax.online','www.resumax.online']
+>>>>>>> 0fe3f30ecd2ab199537986faae6360ae3304e95d
 
 
 # Application definition
