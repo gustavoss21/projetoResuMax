@@ -12,20 +12,12 @@ services:
      -  443:443
     networks:
      -  nwresumax
-    volumes:
-      - ./nginx/conf/:/etc/nginx/conf.d/:ro
-      - ./certbot/www:/var/www/certbot/:ro
     
     depends_on:
      -  resumax1
      -  resumax2
      -  resumax3
 
-  certbot:
-    image: certbot/certbot:latest
-    volumes:
-      - ./certbot/www/:/var/www/certbot/:rw
-    container_name: certbot
 
   pgresumax:
     build:
