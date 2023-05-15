@@ -6,5 +6,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY /docker/nginx.conf /etc/nginx/sites-enabled/default
 COPY /docker/ssl-params.conf /etc/nginx/snippets/ssl-params.conf
 COPY . /var/www
+EXPOSE 443
 ENTRYPOINT ["nginx"]
 CMD ["-g", "daemon off;"]
