@@ -9,7 +9,6 @@ services:
     container_name: nginx
     ports:
      -  80:80
-     -  443:443
     networks:
      -  nwresumax
     depends_on:
@@ -17,9 +16,7 @@ services:
      -  resumax2
      -  resumax3
     restart: always
-    volumes:
-      - ./nginx/conf/:/etc/nginx/conf.d/:ro
-
+  
   pgresumax:
     build:
       dockerfile:  ./docker/pgresumax.dockerfile
