@@ -1,5 +1,5 @@
-FROM python:3.9.0-alpine
-LABEL maintainer "gutavos souza <santos.gs708@gamil.com>"
+FROM python:3.10-alpine
+LABEL maintainer "gustavo souza email:santos.gs708@gmail.com"
 COPY . /var/www
 WORKDIR /var/www
 RUN apk update && apk add zlib-dev jpeg-dev gcc musl-dev python3-dev postgresql-dev
