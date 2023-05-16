@@ -1,9 +1,7 @@
-FROM python:3.10-alpine
-LABEL maintainer "gustavo souza email:santos.gs708@gmail.com"
+FROM python:3.9.0-alpine
+LABEL maintainer "gutavos souza <santos.gs708@gamil.com>"
 COPY . /var/www
 WORKDIR /var/www
-RUN apk update && apk add zlib-dev jpeg-dev gcc musl-dev python3-dev postgresql-dev
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN apk update && apk add zlib-dev jpeg-dev gcc musl-dev python3-dev postgresql-dev && pip install -r requirements.txt && python manage.py collectstatic --noinput
 ENTRYPOINT gunicorn --bind 0.0.0.0:8000 resumax.wsgi
 EXPOSE 8000

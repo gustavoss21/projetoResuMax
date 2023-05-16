@@ -8,14 +8,13 @@ services:
     image: gustavo/nginx_resumax:v1
     container_name: nginx
     ports:
-     -  80:80
+     -  "8080:80"
     networks:
      -  nwresumax
     depends_on:
      -  resumax1
      -  resumax2
      -  resumax3
-    restart: always
   
   pgresumax:
     build:
