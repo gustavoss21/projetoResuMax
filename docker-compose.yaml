@@ -45,7 +45,7 @@ services:
       dockerfile: ./docker/resumax.dockerfile
       context: .
     image: gustavo/resumax:v2
-    container_name: resumax1
+    container_name: resumax_https1
     ports:
       - "8000"
     networks:
@@ -58,7 +58,7 @@ services:
       dockerfile: ./docker/resumax.dockerfile
       context: .
     image: gustavo/resumax:v2
-    container_name: resumax2
+    container_name: resumax_https2
     ports:
       -  "8000"
     networks:
@@ -71,7 +71,7 @@ services:
       dockerfile: ./docker/resumax.dockerfile
       context: .
     image: gustavo/resumax:v2
-    container_name: resumax3
+    container_name: resumax_https3
     ports:
      -  "8000"    
     networks:
