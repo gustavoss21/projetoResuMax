@@ -8,6 +8,7 @@ services:
     image: gustavo/nginx_resumax:v1
     container_name: nginx
     ports:
+     -  80:80
      -  443:443
     networks:
      -  nwresumax
@@ -15,6 +16,9 @@ services:
      -  resumax1
      -  resumax2
      -  resumax3
+    restart: always
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
 
   pgresumax:
     build:

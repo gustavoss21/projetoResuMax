@@ -5,6 +5,6 @@ ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 COPY /docker/nginx.conf /etc/nginx/nginx.conf
 COPY . /var/www
-EXPOSE 443
+EXPOSE 80 443
 ENTRYPOINT ["nginx"]
 CMD ["-g", "daemon off;"]
