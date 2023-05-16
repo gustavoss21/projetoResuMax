@@ -5,7 +5,7 @@ services:
     build:
       dockerfile: ./docker/nginx.dockerfile
       context:  .
-    image: gustavo/nginx_resumax:v1
+    image: gustavo/nginx_resumax:v2
     container_name: nginx
     ports:
      -  80:80
@@ -44,7 +44,7 @@ services:
     build: 
       dockerfile: ./docker/resumax.dockerfile
       context: .
-    image: gustavo/resumax:v1
+    image: gustavo/resumax:v2
     container_name: resumax1
     ports:
       - "8000"
@@ -57,7 +57,7 @@ services:
     build: 
       dockerfile: ./docker/resumax.dockerfile
       context: .
-    image: gustavo/resumax:v1
+    image: gustavo/resumax:v2
     container_name: resumax2
     ports:
       -  "8000"
@@ -70,7 +70,7 @@ services:
     build: 
       dockerfile: ./docker/resumax.dockerfile
       context: .
-    image: gustavo/resumax:v1
+    image: gustavo/resumax:v2
     container_name: resumax3
     ports:
      -  "8000"    
