@@ -13,6 +13,7 @@ services:
      -  resumax1
      -  resumax2
      -  resumax3
+     -  certbot
     restart: always
     volumes:
       - ./docker/nginx.conf :/etc/nginx/conf.d/:ro
