@@ -13,8 +13,6 @@ services:
      -  nwresumax
     depends_on:
      -  resumax1
-     -  resumax2
-     -  resumax3
   
   pgresumax:
     build:
