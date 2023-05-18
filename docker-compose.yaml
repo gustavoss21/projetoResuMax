@@ -81,8 +81,4 @@ networks:
   nwresumax:
    driver: bridge
 
-volumes:
-  pgdata:
-  ./data/certbot/conf:
-  ./data/nginx:
-  ./data/certbot/www:
+
