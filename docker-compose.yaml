@@ -2,7 +2,10 @@ version: "3.4"
 
 services:
   nginx:
-    image: nginx:1.15-alpine 
+    build:
+      dockerfile:  ./docker/nginx.dockerfile
+      context: .
+    image: nginx:v2
     container_name: nginx_https
     ports:
       - "80:80" 
@@ -13,10 +16,6 @@ services:
       -  resumax1
       -  resumax2
       -  resumax3
-    volumes:
-      - ./data/nginx:/etc/nginx/conf.d:ro
-      - /etc/letsencrypt/:/etc/letsencrypt:ro
-      - /etc/ssl/certs/dhparam.pem:/etc/ssl/certs/dhparam.pem:ro
 
   pgresumax:
     build:
