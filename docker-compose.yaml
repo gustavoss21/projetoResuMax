@@ -2,28 +2,27 @@ version: "3.4"
 
 services:
   nginx:
-    image: nginx:latest
+    image: nginx:1.15-alpine 
     container_name: nginx_https
     ports:
-     -  80:80
-     -  443:443
+      - "80:80" 
+      - "443:443" 
     networks:
-     -  nwresumax
+      -  nwresumax
     depends_on:
-     -  resumax1
-     -  resumax2
-     -  resumax3
-     -  certbot
-    restart: always
-    volumes:
-      - ./nginx/conf/ :/etc/nginx/conf.d/:ro
-      - ./certbot/www:/var/www/certbot/:ro
-      # - ./certbot/conf/:/etc/nginx/ssl/:ro
-  certbot:
-    image: certbot/certbot:latest
-    volumes:
-      - ./certbot/www/:/var/www/certbot/:rw
-      # - ./certbot/conf/:/etc/letsencrypt/:rw
+      -  resumax1
+      -  resumax2
+      -  resumax3
+      -  certbot
+    volumes: 
+      - ./data/nginx:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt 
+      - ./data/certbot/www:/var/www/certbot 
+  certbot: 
+    imagem: certbot/certbot:latest
+    volumes: 
+      - ./data/certbot/conf:/etc/letsencrypt 
+      - ./data/certbot/www:/var/www/certbot
 
   pgresumax:
     build:
@@ -71,7 +70,7 @@ services:
     image: gustavo/resumax:v2
     container_name: resumax_https3
     ports:
-     -  "8000"    
+      - "8000"    
     networks:
       - nwresumax
     depends_on:
