@@ -81,4 +81,6 @@ networks:
   nwresumax:
    driver: bridge
 
+volumes:
+  pgdata:
 
