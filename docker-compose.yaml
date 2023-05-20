@@ -18,8 +18,8 @@ services:
       -  resumax3
     restart: always
     volumes:
-      - ./nginx/conf/:/etc/nginx/conf.d/:ro
-      - ./certbot/www:/var/www/certbot/:ro
+      - ./data/nginx/:/etc/nginx/conf.d/:ro
+      - ./data/certbot/www:/var/www/certbot/:ro
 
   # certbot:
   #   image: certbot/certbot:latest
