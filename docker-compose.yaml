@@ -16,6 +16,16 @@ services:
       -  resumax1
       -  resumax2
       -  resumax3
+    restart: always
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:ro
+      - ./certbot/www:/var/www/certbot/:ro
+
+  # certbot:
+  #   image: certbot/certbot:latest
+  #   volumes:
+  #     - ./certbot/www/:/var/www/certbot/:rw
+      # - ./certbot/conf/:/etc/letsencrypt/:rw  
 
   pgresumax:
     build:
