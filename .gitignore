@@ -11,4 +11,7 @@ node_modules/
 media/
 env/
 test.js
+docker/
+docker-compose.yaml
+data/
 
