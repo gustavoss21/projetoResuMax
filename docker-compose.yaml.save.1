@@ -22,8 +22,8 @@ services:
       - ./data/certbot/www:/var/www/certbot/:ro
       - ./data/certbot/conf/:/etc/nginx/ssl/:ro
       - type: bind
-        source: /var/lib/docker/volumes/perfil_static_volume/_data
-        target: /home/app/web/perfil/static
+      source: ./static
+      target: /home/app/web/perfil/static
 
   certbot:
       image: certbot/certbot:latest
