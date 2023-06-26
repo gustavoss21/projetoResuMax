@@ -16,13 +16,13 @@ services:
       -  resumax1
       -  resumax2
       -  resumax3
+      -  web
     restart: always
     volumes:
       - ./data/nginx/:/etc/nginx/conf.d/:ro
       - ./data/certbot/www:/var/www/certbot/:ro
       - ./data/certbot/conf/:/etc/nginx/ssl/:ro
-      - static_volume:/home/app/web/perfil/static
-      - media_volume:/home/app/web/perfil/media
+ nginx_flesk
 
   certbot:
       image: certbot/certbot:latest
@@ -88,6 +88,4 @@ networks:
 
 volumes:
   pgdata:
-  static_volume:
-  media_volume:
 
