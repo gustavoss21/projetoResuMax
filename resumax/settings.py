@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['www.resumax.online','resumax.online']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -80,12 +80,13 @@ WSGI_APPLICATION = 'resumax.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 # banco de dados local
-"""DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}"""
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
 # banco de dados server
 DATABASES = {
     'default': {
