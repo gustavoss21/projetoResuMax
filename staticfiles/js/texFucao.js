@@ -10,41 +10,45 @@ let folha_camuflada
 
 function retorna_html() {
     primeiroParagrafoFolha()
-    let folhas = document.querySelectorAll('.ql-editor')
     let elemento_vazio
     let conteudo = ''
-    let pdf = ''
-    for (let pagina of folhas) {
+    let have_text = true
+    $('.ql-editor').each((i,pagina)=>{
         elemento_vazio = pagina.firstElementChild
         conteudo += pagina.innerHTML
-        // pdf += pagina.textContent
-    }
+    })
     if (lista_conteudo) {
         conteudo += lista_conteudo
-        // let pattern = /<p.*?>(.*?)<\/p>/g
-        // let new_list = lista_conteudo.replace(pattern, '$1 ')
-        // pdf+=new_list
     }
+    if ((conteudo.replace(/<[^>]*>/g, '')).length <= 1){
+        conteudo = false
+    }
+    console.log(conteudo)
     return conteudo
 }
 
 function salvarConteudo() {
-    let artigo = retorna_html()
-    // console.log(artigo)
+    let html_sheets = retorna_html()
+    origin = location.origin
 
-    fetch("/salvarConteudo/", {
-        method: 'POST',
+    if(!html_sheets)return
+    $.ajax({type:'POST',
         headers: {
             'X-CSRFToken': csrf_token
         },
-        body: JSON.stringify({ 'conteudo': artigo})
-    }).then(function (data) {
-        return data.json()
-    }).then(function (data) {
-        if (data.redirect) {
-            location.assign('usuario/accounts/login/');
-        }
-    })
+        url: `${origin}/salvarConteudo/`,
+        data:html_sheets,
+        dataType:'json',
+        success: data=>{
+            console.log('data: ',data)
+            if (data.redirect) {
+                console.log(html_sheets)
+                salvarNoStorage('texto_temporario',html_sheets)
+                location.assign('usuario/accounts/login/');
+            }
+        },
+        error:datas=>{console.log(datas)}
+    });
 }
 
 function salvarTopico() {

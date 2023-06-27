@@ -79,17 +79,7 @@ btn_baixar_resumo.addEventListener('click', function () {
 
 checked_filter.addEventListener('click', function () { definicoesFilter() })
 
-// let btn_salvar_conteudo = document.querySelector('#btn-salvar-conteudo')
 $('#btn-salvar-conteudo').on('click', function () {
-    // if (renderiza_pdf) {
-    let confirm = window.confirm('seu arquivo anterior será substituido! ')
-    if (confirm) {
-        // renderiza_pdf = false
-    } else {
-        return location.pathname = '/'
-        }
-    // }
     salvarConteudo()
-    return location.reload()
-
+    // return location.reload()
 })

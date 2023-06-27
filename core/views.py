@@ -86,17 +86,14 @@ def apagadorTextoFucao(request):
 class SalvarConteudo(View):
     def post(self, request, *args, **kwargs):
         # se a requisiçao nao ter o body, a class foi chamada dentro de outra
+        conteudo = (request.body).decode('utf-8')
         usuario = request.user.is_authenticated
-        dados = json.loads(request.body)
         if not usuario:
             messages.warning(request, 'faça login, para salvar dados!')
-            if len(dados.get('conteudo')) > 15 :
-                request.session['temporario'] = dados.get('conteudo')
-                request.session.save()
             return HttpResponse(json.dumps({'redirect': 'usuario/login'}))
         artigo = ConteudoModel.objects.all()
         resultado = artigo.get_or_create(user=request.user)
-        resultado[0].conteudo = dados.get('conteudo')
+        resultado[0].conteudo = conteudo
         resultado[0].save()
         return HttpResponse('1')
     

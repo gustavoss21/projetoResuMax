@@ -192,27 +192,44 @@ async function setTextSheet(folha, nova_folha,set_end) {
     let position_comand = ['append','prepend']
     folhas_renderizadas = true
     paginas--
-    
+
+
     if (!nova_folha) {
         lista_conteudo = await mixinsetTextSheet()
+        console.log(lista_conteudo,1111)
+
     }
     if(!(set_end===undefined)){
         set_end ? $(folha).append(lista_conteudo):$(folha).prepend(lista_conteudo)
     }else{
-        $(folha).html(lista_conteudo)
+        let text_storage = localStorage.getItem('texto_temporario')
+        if(text_storage){
+            // localStorage.removeItem('texto_temporario')
+            if(lista_conteudo){
+                let replace = confirm('Parece que você tem dados salvo, deseja substituir belo novo?')
+                if(replace){
+                    $(folha).html(text_storage)
+                    // salvarConteudo()
+                }else{
+                    $(folha).html(lista_conteudo)
+                }
+                
+            }else{
+                $(folha).html(text_storage)
+                // salvarConteudo()
+            }
+            
+        }else{
+            $(folha).html(lista_conteudo)
+        }
+    
+        
     }
 
-    // console.log(lista_conteudo)
     lista_conteudo = ''
 
     if (folha.offsetHeight < folha.scrollHeight) {
         lista_conteudo = downText(folha)
-        // if (mais_folha || paginas<1) {
-        //     console.log(mais_folha + 11111111111)
-        //     let elemento_mais_folha = document.querySelector('#maisfolha')
-        //     elemento_mais_folha.style.display = 'block'
-        //     return
-        // }
         let folha_index = ($('.ql-editor').index(folha))+1
         let next_sheet = $('.ql-editor')[folha_index]
         if(next_sheet){
@@ -235,14 +252,8 @@ async function mixinsetTextSheet() {
     }
 
     let data = await getSheetData()
-    if ('vazio' === data) return []
-
+    if ('vazio' === data) return false
     data = Object.values(data)[0]
-    // console.log(data)
-
-    // let parser = new DOMParser();
-    // const doc = parser.parseFromString(data, 'text/html');
-    // lista_conteudo = [...doc.getElementsByTagName('p')]
     return data
 }
 /**

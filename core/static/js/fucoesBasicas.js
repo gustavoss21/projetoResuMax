@@ -267,6 +267,7 @@ function clickedTecla(btn) {
     }
     let folha = cursor_node.parentElement
     let index_folha = [...folhas].indexOf(folha)
+    // certica que tenha o index da folha
     if (index_folha === -1) {
         folha = cursor_node.parentElement.parentElement
         index_folha = [...folhas].indexOf(folha)
@@ -343,26 +344,23 @@ function clickedTecla(btn) {
                 return
             }
             sobeTextoFolha(folhas[index_folha - 1],folha)
-            elemeno = folhas[index_folha - 1].firstChild
+            elemeno = folhas[index_folha - 1].lastChild
             setCursor(elemeno)
 
         }
         
     }else {
-        //
         let proxima_folha = $('.ql-editor')[index_folha + 1]
         if (cursor_node === folha.lastChild){
+            let passed_shore = check_marge(folha)
+            if (! passed_shore) return
         // desce o cursor para o primeiro elemento da pagina seguinte 
             if(!proxima_folha){
-                proxima_folha = novaFolha(true)
+                // proxima_folha = novaFolha(true)
+                return
             }
             let elemeno = proxima_folha.firstChild
-            
-            // if (btn.key === 'ArrowDown') {
 
-            //     return
-            // } 
-            
             if (btn.key === 'Backspace') {
                 cursor_node.remove()
             }
@@ -375,7 +373,21 @@ function clickedTecla(btn) {
         }
     } 
 }
+function check_marge(folha){
+    let check_folha = $(folha).is('.ql-editor')
+    if (! check_folha) ReferenceError('elemento inadequado!')
+    let last_children_height = folha.lastChild.offsetHeight
+    let sheet_height = folha.offsetHeight
+    let last_children_position = folha.lastChild.offsetTop
+    last_children_position += last_children_height
+        
+    if(sheet_height-last_children_height <= last_children_position){
+        return true
+    }
+    return false
 
+
+}
 function geraPdf() {
     let elementos = document.querySelectorAll('.text-fucao > p')
     let html = ''

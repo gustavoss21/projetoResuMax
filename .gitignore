@@ -13,5 +13,7 @@ env/
 test.js
 docker/
 docker-compose.yaml
+*yaml*
 data/
-
+settings.py
+staticfiles/
