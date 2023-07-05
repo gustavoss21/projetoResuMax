@@ -3,7 +3,7 @@ autopep8==1.7.0
 certifi==2022.12.7
 cffi==1.15.1
 charset-normalizer==2.1.1
-Django==3.2
+Django==3.2.20
 gunicorn==20.1.0
 idna==3.4
 jsonpickle==3.0.1
