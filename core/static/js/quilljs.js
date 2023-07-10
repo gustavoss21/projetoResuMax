@@ -54,7 +54,7 @@ function criarQuill(folha) {
     })
 
     lista_Quill.push(quill)
-    console.log(11111111)
+    //(11111111)
 
 }
 

@@ -43,8 +43,8 @@ main.row{
     background-color: rgba(173, 216, 230, 0.500);
     width: 198px;
     box-sizing: border-box;
-    width: 170px;
-    position: fixed;
+    /* width: 170px; */
+    /* position: fixed; */
 }
 .barra-lateral-esquerda button {
     min-width: 133px;
@@ -83,12 +83,12 @@ font-size: 18px;
             padding: 5px;
         }
 }
-/* #bloco-right button.dropdown-toggle {
-    margin: 0px 0px 10px 11px;
-    width: 129px;
-    height: 40px;
-    background-color: rgb(87, 148, 168, 0.8);
-} */
+
+i.icon-saved{
+    display: none;
+    color: green;
+}
+
 /* ######################### */
 /* conteudo central folha */
 
@@ -96,12 +96,12 @@ font-size: 18px;
     width: 100%;
     margin: initial;
 }
-#conteudo-central {
+/* #conteudo-central {
     margin-top: 10px;
     margin-left: 175px;
     margin-right: 20px;
     margin-bottom: 20px;
-}
+} */
 #bloco-center {
     position: relative;
     padding: initial;
@@ -138,10 +138,14 @@ font-size: 18px;
     background-color: rgb(192 217 225);
     border: 1px solid #5794a82b;
     border-radius: 0px 0px 23px 23px;
+    font-size: 0.8rem;
 }
 
 .selecao .linha {
     border-top: 1px solid #5794a8;
+}
+.conteudo-selecao *{
+    cursor: pointer;
 }
 
 .conteudo-selecao {
@@ -174,18 +178,18 @@ font-size: 18px;
     margin: auto;
     box-sizing: border-box;
 }
-.conteinar-tex-funcao{
+/* .conteinar-tex-funcao{
     background: #00000063;
     padding: 37px 10px 10px 10px;
     border-radius: 10px;
-}
-.text-fucao{
+} */
+/* .text-fucao{
     display: flex;
     flex-wrap: nowrap;
     align-content: center;
     justify-content: space-between;
     align-items: center;
-}
+} */
 @media (max-width:768px) {
     #conteudo-central {
         /* margin: 30px; */
@@ -204,13 +208,15 @@ font-size: 18px;
 #maisfolha:hover{
     background-color: #033789;
 }
+
+
 /* 
 subtema-color: blue
 topico-color: green
 importante-color: red
 destaque-color:yellow
  */
-.text-destaque,
+/* .text-destaque,
 .text-importante,
 .text-subtema,
 .text-topico {
@@ -218,23 +224,16 @@ destaque-color:yellow
     padding: 10px;
     background-color: white;
     box-shadow: 1px 1px 3px #00000052;
+} */
+.text-fucao textarea{
+    font-size: 0.5rem;
 }
 
 .delete-tex-fucao {
-    display: flex;
-    float: right;
     cursor: pointer;
-    padding: 3px 6px;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 8px;
-    position: relative;
-    top: -4px;
-    
 }
-
 .delete-tex-fucao:hover {
-    background-color: rgba(0, 0, 0, 0.261);
+    background-color: red;
     color: white;
 }
 
@@ -253,7 +252,7 @@ destaque-color:yellow
 .text-destaque {
     border: 1px solid rgb(255, 255, 0, 0.5);
 }
-#btn-baixar-resumo {
+/* #btn-baixar-resumo {
     position: relative;
     top: -28px;
     padding: 10px;
@@ -262,10 +261,10 @@ destaque-color:yellow
     color: white;
     font-size: 15px;
     box-shadow: 5px 2px 8px 0px #0a0a0a4f;
-}
-#btn-baixar-resumo:hover {
+} */
+/* #btn-baixar-resumo:hover {
         box-shadow: inset 0px 0px 8px 0px;
-}
+} */
 /* ######################### */
 /* barra lateral direita */
 

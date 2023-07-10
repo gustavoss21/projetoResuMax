@@ -7,19 +7,20 @@ from django.views.generic.base import TemplateView, View
 import json
 from io import StringIO
 from .utils import utils
-from .models import ConteudoModel,DestaqueModel,ImportanteModel,SubtemaModel,TopicoModel
+from .models import ConteudoModel,FiltroItemModel
 from django.core.files.base import ContentFile
 from django.http import FileResponse
 import tempfile
 import os
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from ast import literal_eval
 
 # atençao a parada forçada na renderizaçao da folha
 def dados(model):
     lista = []
-    for value in model.values():
-        lista.append(value)
+    for object in model.values():
+        lista.append(object)
 
     return lista
 
@@ -59,29 +60,36 @@ class HomeView(TemplateView):
             request.session.save()
     
         return render(request,'index.html',context)
-
       
 def apagadorTextoFucao(request):
-    dados = json.loads(request.body)
-    tipo_texto = dados.get('tipo_texto_fucao')
-    texto_id = dados.get('id')
-    finded_object = False
-    list_type_text = {
-        'topico': TopicoModel,
-        'importante': ImportanteModel,
-        'destaque': DestaqueModel,
-        'subtema': SubtemaModel,
-    }
-    for key in list_type_text:
-        if tipo_texto == key:
-            finded_object = True
-            model = list_type_text[key]
-            object_model = model.objects.filter(id=texto_id)
-            object_model.delete()
-    if not finded_object:
-        messages.warning(request,'Houve um erro inesperado, tente novamente!')
+    """apaga o texto do filtro expecificado
+    
+    request.body:
+    dicionario -- contendo o tipo de filter e o id
+    Return: return_description
+    """
+    
+    if request.method == 'POST':
+
+        dados = literal_eval(request.body.decode('utf-8'))
+        filter_id = dados['id']
+   
+        if not filter_id:
+            raise ValueError('Esta faltando o nome do filtro ou id, para apagar!')
         
-    return HttpResponse('1')
+        object = FiltroItemModel.objects.get(id=filter_id)
+
+        if not object: raise ValueError('Error a o apagar. Objecto não encontrado!')
+        try:
+            FiltroItemModel.delete(object)
+        except Exception as error:
+            messages.error(request,'Hove um erro inesperado!')
+            raise Exception('Hove um erro inesperado!',error)
+            
+        return HttpResponse(0)
+
+    messages.warning(request,'Houve um erro inesperado, tente novamente!')
+    raise Exception('Metodo GET não Pemitido!')
 
 class SalvarConteudo(View):
     def post(self, request, *args, **kwargs):
@@ -95,64 +103,30 @@ class SalvarConteudo(View):
         resultado = artigo.get_or_create(user=request.user)
         resultado[0].conteudo = conteudo
         resultado[0].save()
-        return HttpResponse('1')
+        return HttpResponse(json.dumps({'success': True}))
     
-class SalvarTopico(View):
+class AddDataFilterViews(View):
     def post(self, request, *args, **kwargs):
         usuario = request.user
         
         if usuario.is_authenticated:
             dados = json.loads(request.body)
-            TopicoModel.objects.create(topico=dados.get('topico'), index=dados.get(
-                'index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'), user=request.user)
+            choices = ['topico','destaque','importante']
+            if not (dados.get('type') in choices):
+                raise messages.warning(request, 'Hove um erro inesperado!')
+            
+            FiltroItemModel.objects.create(
+                filter_type=dados.get('type'),
+                text=dados.get('text'),
+                index=dados.get('index'),
+                length=dados.get('tamanho'),
+                folha_index=dados.get('folha_index'), 
+                user=request.user
+            )
 
         else:
-
             messages.warning(request, 'faça login, para salvar dados!')
         return HttpResponse(1)
-
-class SalvarSubtema(View):
-    def post(self, request, *args, **kwargs):
-        dados = json.loads(request.body)
-        usuario = request.user
-
-        if usuario.is_authenticated:
-            SubtemaModel.objects.create(subtema=dados.get('subtema'), index=dados.get(
-                'index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'), user=request.user)
- 
-        else:
-
-            messages.warning(request, 'faça login, para salvar dados!')
-        return HttpResponse(1)
-
-class SalvarDestaque(View):
-    def post(self, request, *args, **kwargs):
-        dados = json.loads(request.body)
-        usuario = request.user
-
-        if usuario.is_authenticated:
-            DestaqueModel.objects.create(destaque=dados.get('destaque'), index=dados.get(
-                'index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'), user=request.user)
-
-        else:
-
-            messages.warning(request, 'faça login, para salvar dados!')
-        return HttpResponse(1)
-
-class SalvarImportante(View):
-    def post(self, request, *args, **kwargs):
-        dados = json.loads(request.body)
-        usuario = request.user
-
-        if usuario.is_authenticated:
-            ImportanteModel.objects.create(importante=dados.get('importante'), index=dados.get(
-                'index'), tamanho=dados.get('tamanho'), folha_index=dados.get('folha_index'), user=request.user)
-
-        else:
-
-            messages.warning(request, 'faça login, para salvar dados!')
-        return HttpResponse(1)
-
 
 class BaixarArquivo(View):
     def get(self, request, *args, **kwargs):   
@@ -171,19 +145,23 @@ class BaixarArquivo(View):
             messages.warning(request,'salve primeiro para baixar pdf ')
             return	redirect('home')
         
-
-class GetDataAll(View):
+class FilterItemsViews(View):
     def get(self, request, *args, **kwargs):
-        subtema = SubtemaModel.objects.filter(user=request.user.id)
-        importante = ImportanteModel.objects.filter(user=request.user.id)
-        destaque = DestaqueModel.objects.filter(user=request.user.id)
-        topico = TopicoModel.objects.filter(user=request.user.id)
-        objeto = {
-            'subtema': dados(subtema),
-            'importante': dados(importante),
-            'destaque': dados(destaque),
-            'topico': dados(topico)}
-        return HttpResponse(json.dumps(objeto))
+        filter_types = kwargs['data'].split(',')
+        # filter_items = dados(FiltroItemModel.objects.all())
+        filter_items = {}
+        for filter_type in filter_types:
+            filter_item = FiltroItemModel.objects.filter(filter_type=filter_type).values()
+            
+            if not filter_item: 
+            
+                filter_items[f"{filter_type}"] = None
+            
+                continue
+        
+            filter_items[f"{filter_type}"] = list(filter_item)
+        
+        return HttpResponse(json.dumps(filter_items))
     
 class GetSheetData(View):
     def get(self, request, *args, **kwargs):
