@@ -5,12 +5,10 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views.generic.base import TemplateView, View
 import json
-from io import StringIO
 from .utils import utils
 from .models import ConteudoModel,FiltroItemModel
 from django.core.files.base import ContentFile
 from django.http import FileResponse
-import tempfile
 import os
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -96,9 +94,11 @@ class SalvarConteudo(View):
         # se a requisiçao nao ter o body, a class foi chamada dentro de outra
         conteudo = (request.body).decode('utf-8')
         usuario = request.user.is_authenticated
+
         if not usuario:
             messages.warning(request, 'faça login, para salvar dados!')
             return HttpResponse(json.dumps({'redirect': 'usuario/login'}))
+        
         artigo = ConteudoModel.objects.all()
         resultado = artigo.get_or_create(user=request.user)
         resultado[0].conteudo = conteudo
@@ -181,9 +181,7 @@ class GetSheetData(View):
             return HttpResponse(json.dumps({'conteudo': conteudo['conteudo'], 'mais_folha': False}))
         return HttpResponse(json.dumps('vazio'))
 
-
 class MaisFolhas(View):
-
     @method_decorator(login_required(login_url='login'))
     def get(self,request,*args,**kwargs):
         conteudo = ConteudoModel.objects.filter(user=self.request.user.id)
@@ -202,7 +200,3 @@ class MaisFolhas(View):
         text = intense_file[0]
 
         return HttpResponse(json.dumps({'conteudo': text,'mais_folha':last_page}))
-    
-
-# io = StringIO('["streaming API"]')
-# json.load(io)

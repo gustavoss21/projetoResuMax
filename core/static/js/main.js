@@ -1,12 +1,13 @@
-let clicked_tecla = false
 let script_text = document.getElementById('date-input')
 let folhas_renderizadas = false
 let btn_mais_folha = document.querySelector('#maisfolha')
 let text_pdf
+
 if (script_text) {
     text_pdf = JSON.parse(script_text.textContent);
     script_text.remove()
 }
+
 let value_temporario = document.getElementById('temporario-dados')
 if (value_temporario) {
     value_temporario = JSON.parse(value_temporario.textContent);
@@ -27,13 +28,14 @@ function loadFilter() {
     if (filter_is_active === 'true') checked_filter.checked = true
 
     for (let filter_item of filters) {
-        console.log(filter_item)
+
         let filter_item_exist = localStorage.getItem('filter-'+filter_item)
 
         if(! filter_item_exist)continue
 
         let filter_item_is_active = filter_item_exist.split(',')[0]
         let element_filter = $(`#${filter_item}`)[0]
+
         if (filter_item_is_active === 'true') {
             element_filter.checked = true
         } else {
@@ -47,12 +49,9 @@ loadFilter()
 criaElementoFolha()
 setTypeSheet()
 adicionaFucaoTextoToolbar()
-
 submitForm()
+mudaCheckBox()
 
-mudaCheckBox()//define checkBox.checked como true, se clicado no seu parent
-
-//
 checked_filter.addEventListener('click', () => {
     if(checked_filter.checked){
         salvarNoStorage('mode-filter',true)
@@ -65,5 +64,4 @@ checked_filter.addEventListener('click', () => {
 
 $('#btn-salvar-conteudo').on('click', function () {
     salvarConteudo()
-    // return location.reload()
 })

@@ -2,28 +2,24 @@ let csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value
 let btn_topico
 let btn_destaque
 let btn_importante
-let btn_subtema
-let text
-let range
-let folha_index
 let folha_camuflada
+let selection_text
+let selection_folha_index
+let selection_index
+let selection_length
+let cont = 0
 
 function retorna_html() {
-    primeiroParagrafoFolha()
-    let elemento_vazio
     let conteudo = ''
-    let have_text = true
+
     $('.ql-editor').each((i,pagina)=>{
         elemento_vazio = pagina.firstElementChild
         conteudo += pagina.innerHTML
     })
-    if (lista_conteudo) {
-        conteudo += lista_conteudo
-    }
+
     if ((conteudo.replace(/<[^>]*>/g, '')).length <= 1){
         conteudo = false
     }
-    console.log(conteudo)
     return conteudo
 }
 
@@ -32,181 +28,134 @@ function salvarConteudo() {
     origin = location.origin
 
     if(!html_sheets)return
+
     $.ajax({type:'POST',
         headers: {
             'X-CSRFToken': csrf_token
         },
         url: `${origin}/salvarConteudo/`,
         data:html_sheets,
-        dataType:'json',
         success: data=>{
-            console.log('data: ',data)
-            if (data.redirect) {
-                console.log(html_sheets)
+            let data_object = JSON.parse(data)
+
+            if (data_object.redirect) {
                 salvarNoStorage('texto_temporario',html_sheets)
                 location.assign('usuario/accounts/login/');
             }
+            anitionSavedContedudo()
         },
-        error:datas=>{console.log(datas)}
-    });
+        error:error=>{
+            console.log('errro ' + error)
+        }
+    })
 }
 
-function salvarTopico() {
-    if (text) {
-        fetch("/salvarTopico/", {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrf_token
-            },
-            body: JSON.stringify({ 'topico': text, 'index': range.index, 'tamanho': range.length, 'folha_index': folha_index })
-        }).then(function (data) {
-            return data.json()
-        }).then(function (data) {
-            tiraSelecao(folha_index, range.index)
-        })
-    }
-
-
+function anitionSavedContedudo(){
+    $('.visibled-main').css('display','none')
+    $('.icon-saved').fadeIn('fast')
+  
+    window.setTimeout(()=>{
+        $('.icon-saved').css('display','none')
+        $('.visibled-main').fadeIn('slow')
+  
+    },3000)
+    
 }
 
-function salvarSubtema() {
-    if (text) {
-        fetch("/salvarSubtema/", {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrf_token
-            },
-            body: JSON.stringify({ 'subtema': text, 'index': range.index, 'tamanho': range.length, 'folha_index': folha_index })
-        }).then(function (data) {
-            return data.json()
-        }).then(function (data) {
-            tiraSelecao(folha_index, range.index)
-        })
+function save_filter_item(selection_type) {
+    if (! selection_text) return
 
-    }
+    fetch("/save-filter-item/", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrf_token
+        },
+        body: JSON.stringify(
+            {
+                'type':selection_type,
+                'text': selection_text,
+                'index': selection_index,
+                'tamanho': selection_length,
+                'folha_index': selection_folha_index
+            }
+        )
+    }).then(function (data) {
+        return data.json()
+    }).then(function (data) {
+        tiraSelecao(selection_folha_index, selection_index)
+    })
 
-}
-
-function salvarDestaque() {
-    if (text) {
-        fetch("/salvarDestaque/", {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrf_token
-            },
-            body: JSON.stringify({ 'destaque': text, 'index': range.index, 'tamanho': range.length, 'folha_index': folha_index })
-        }).then(function (data) {
-            return data.json()
-        }).then(function (data) {
-            tiraSelecao(folha_index, range.index)
-        })
-
-    }
 
 }
 
-function salvarImportante() {
-    if (text) {
-        fetch("/salvarImportante/", {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrf_token
-            },
-            body: JSON.stringify({ 'importante': text, 'index': range.index, 'tamanho': range.length, 'folha_index': folha_index })
-        }).then(function (data) {
-            return data.json()
-        }).then(function (data) {
-            tiraSelecao(folha_index,range.index)
-        })
-    }
 
-
-}
 /**
 * - cria uma caixa de opçoes, que darao funcionalidades, como, definir um topico, ao texto.
-* - fucionalidades[topico,destaque,destaque,subtema]
+* - fucionalidades[topico,destaque,destaque]
 * - return caixa_selecao(div com todas funcionalidades)
 */
 function criaSeletor() {
     let caixa_selecao = document.createElement('div')
     let title = document.createElement('span')
     let div_opcoes_selecao = document.createElement('div')
+    let filter_types = ['destaque','topico','importante']
 
+    div_opcoes_selecao.setAttribute('class','conteudo-selecao')
     caixa_selecao.setAttribute('class', 'selecao')
     title.setAttribute('class', 'title-selecao')
     title.innerText = 'definir como:'
     caixa_selecao.appendChild(title)
 
-    div_opcoes_selecao.setAttribute('class', 'conteudo-selecao')
+    for(let v of filter_types){
+        let btn = cria_elemento_seletor(v)
+        div_opcoes_selecao.appendChild(btn)
+    }
     caixa_selecao.appendChild(div_opcoes_selecao)
-
-    btn_destaque = document.createElement('div')
-    btn_destaque.setAttribute('class', 'btn-destaque')
-    btn_destaque.innerText = 'destaque'
-    div_opcoes_selecao.appendChild(btn_destaque)
-
-    btn_subtema = document.createElement('div')
-    btn_subtema.setAttribute('class', 'btn-subtema')
-    btn_subtema.innerText = 'subtema'
-    div_opcoes_selecao.appendChild(btn_subtema)
-
-    btn_topico = document.createElement('div')
-    btn_topico.setAttribute('class', 'btn-topico')
-    btn_topico.innerText = 'topico'
-    div_opcoes_selecao.appendChild(btn_topico)
-
-
-    btn_importante = document.createElement('div')
-    btn_importante.setAttribute('class', 'btn-importante')
-    btn_importante.innerText = 'importante'
-    div_opcoes_selecao.appendChild(btn_importante)
-
     return caixa_selecao
 }
+function cria_elemento_seletor(type){
+    let btn = document.createElement('div')
+    btn.setAttribute('class', `btn-${type}`)
+    btn.innerText = type
+    return btn
+}
 
-//adiciona caixa_seletor na toolbar
+/**
+ * adiciona caixa_seletor na toolbar
+ */ 
 function adicionaFucaoTextoToolbar() {
     let toolbxx = document.querySelectorAll(".ql-toolbar")
-    console.log(toolbxx)
 
     for (let box of toolbxx) {
         let seltor_existe = box.querySelector('.selecao')
         box.parentElement.style.zIndex = 1
         if (!seltor_existe) {
             box.appendChild(criaSeletor())
-
         }
-
     }   
 }
 
 /**
- * se tiver algum texto selecionado, sera difinido o range, folha e o texto
- 
-    * se tiver mundaça no texto da folha ativará a funcao seMudanca,
-    responvel pela quebra de pagina.
+ * faz atribuição a elementos que sera salvo, como texto, index, length e o index da folha
 */
 function definicoesSelecaoTexto() {
-    let folhas = document.querySelectorAll(".ql-editor")
+    for (const q of lista_Quill){
+        q.on('selection-change', function(range, oldRange, source) {
 
-    for (const folha of folhas) {
-        folha.addEventListener('click', function () {
-            let indece = [...folhas].indexOf(folha)
-
-            //defines text filter data that will be saved
-            if (lista_Quill[indece]) {
-                range = lista_Quill[indece].getSelection();
-
-                text = lista_Quill[indece].getText(range.index, range.length);
-                folha_index = indece
-            }
-            setSuperimposeSheet(indece+1)
-        }
-        )
+            if (range) {
+                selection_index = range.index;
+                selection_text = q.getText(range.index, range.length);
+                selection_folha_index = lista_Quill.indexOf(q)
+                selection_length = range.length
+            }  
+        })
     }
 }
+
 /**
  * evita que o folha sopreponha a toolbar ou outros itens
+ * 
+ * HÁ NECESSIDADE?
  */
 function setSuperimposeSheet(superimpose_index = 0) {
     let folhas = document.querySelectorAll(".ql-editor")
@@ -224,33 +173,22 @@ function setSuperimposeSheet(superimpose_index = 0) {
     }
 }
 
-// adiciona o evento click nos botoes do caixa_seletor
+/**
+adiciona o evento click nos botoes do caixa_seletor 
+*/ 
 function setBotao() {
-    let toolbxx = document.querySelectorAll(".ql-toolbar")
-    for (let botoes of toolbxx) {
-        let opcoes_selecao = botoes.lastChild.lastChild
-        for (let btn of opcoes_selecao.children) {
-            btn.addEventListener('click',function () {
-                switch (this.innerText) {
-                    case 'destaque':
-                        salvarDestaque()
-                        break
-                    case 'importante':
-                        salvarImportante()
-                        break
-                    case 'subtema':
-                        salvarSubtema()
-                        break
-                    case 'topico':
-                        salvarTopico()
-                        break
-                }
-            }
-            )
-        }
-    }
-}
+    let btn_set_filter = document.querySelectorAll(".conteudo-selecao")
+    for (let btn of btn_set_filter) {
+        btn.addEventListener('click',e => {
+            let class_filter = e.target.getAttribute('class')
+            let filter_type = (class_filter.split('-'))[1]
 
+            save_filter_item(filter_type)    
+        }
+        )
+    }
+    
+}
 
 function tiraSelecao(index_quill,index) {
     lista_Quill[index_quill].setSelection(index, 0, "silent")
@@ -268,98 +206,80 @@ function submitForm() {
 
 function pdfAdd(data) {
     let palavras = data.split('. ')
+
     for (let index = 0; index < palavras.length; index++) {
         palavras[index] = `<p>${palavras[index]}.</p>`
     }
     return palavras.join('')
    
 }
-function control_v(){
+function control_v_or_x(){
     var ctrl=window.event.ctrlKey;
     var tecla=window.event.keyCode;
-    
-    if (ctrl && tecla==86) return true
+
+    if (ctrl && (tecla==86|tecla==88)) return true
 }
 
 function getSelecao() {
-    let btn_control_v = false
+    let control_key = false
+
     document.addEventListener('keydown', btn => {
-        btn_control_v = control_v()
+        control_key = control_v_or_x()
     })
+
     document.addEventListener('keyup', btn => {
        
-        if(btn_control_v){
+        if(control_key){
             clickedTecla('controlV')
             return
 
         }
 
         let list_btn = ['Delete', 'ArrowUp', 'Backspace', 'ArrowDown','Enter']
-        console.log(btn.key)
+        
         if (list_btn.indexOf(btn.key) === -1)return
         
         clickedTecla(btn)
-        clicked_tecla = true
     })
-    let elemento = false
-    // for (const elemeno of lista_Quill) {
-    //     if(elemento) continue
-    //     elemeno.on('text-change', function (delta, oldDelta, source) {
-    //         let folha_index = lista_Quill.indexOf(elemeno)
-    //         let folha = $('.ql-editor')[folha_index]
-    //         if (folha.offsetHeight < folha.scrollHeight)  SeMudanca(folha_index)
-    //         elemento = true
-            
-    //     });
-    // }
 }
+
 /**
- *  verifica quais filter-text estao vazios e informa
- *  a seu respectivo filtro
-*/
-function defineCheckItemVazio() {
-    
-    if (!lista_funcoes_texto) return
+ * verifica quais filter-text estao vazios e informa
+ *  a seu respectivo filtro no html
+ * @param {String} filter_item_name 
+ */
+function defineCheckItemVazio(filter_item_name) {
+    let tes = document.querySelector(".item-vazio-" + filter_item_name)
+    if (!(tes)) {
+        let lista_vazia = document.createElement('span')
+        let texto = document.createTextNode('vazio!')
 
-    for (let item_fucao_key of Object.keys(lista_funcoes_texto)) {
-        let item_fucao_value = lista_funcoes_texto[item_fucao_key][0]
+        lista_vazia.appendChild(texto)
+        lista_vazia.setAttribute('class', 'item-vazio-' + filter_item_name)
+        lista_vazia.style.color = '#00000070'
 
-        if (item_fucao_value.length === 0) {
-            // verifica se o elemento já tem a msg de vazio
-            let tes = document.querySelector(".item-vazio-" + item_fucao_key)
-            if (!(tes)) {
-                let lista_vazia = document.createElement('span')
-                let texto = document.createTextNode('vazio!')
-                lista_vazia.appendChild(texto)
-                lista_vazia.setAttribute('class', 'item-vazio-' + item_fucao_key)
-                lista_vazia.style.color = '#00000070'
-                document.querySelector('#' + item_fucao_key).parentElement.appendChild(lista_vazia)
-            }
-
-        }
+        document.querySelector('#' + filter_item_name).parentElement.appendChild(lista_vazia)
     }
+
 }
 
-async function getDataAll() {
-    const response =  fetch('/get-dados/', {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-        },
-    })
-    const data = await response.then(response => {
-       return response.json()
-    }).then(response => { 
-        lista_funcoes_texto = {}
-        
-        for (let item of Object.keys(response)) {
-            let input_filter = document.querySelector('#' + item)
-            lista_funcoes_texto[item] = [response[item],input_filter] 
-        }
-        return lista_funcoes_texto
+async function get_filter_items(filter_items) {
+    let data_object
 
-        })
-    return data
+    await  $.ajax({type:'GET',
+        url: `${origin}/filter-items/${filter_items}`,
+        success: data=>{
+            data_object = JSON. parse(data)
+
+            if (data_object.redirect) {
+                location.assign('usuario/accounts/login/');
+            }
+        },
+        error:error=>{
+            console.log('errro ' + error)
+        }
+    })
+    return data_object
 }
 
 async function getSheetData() {
@@ -379,6 +299,7 @@ async function getSheetData() {
 document.addEventListener('click', event => {
     let btn_adiciona_arquivo = document.querySelector('#btn-adicionar-pdf')
     let btn_filter = document.querySelector('#btn-filter')
+    let bloco_center = document.querySelector('#bloco-center')
     let btn_class = []
 
     btn_class.push(btn_adiciona_arquivo.getAttribute('class'))
@@ -386,9 +307,9 @@ document.addEventListener('click', event => {
 
     for (let btn of btn_class) {
         if (btn.search('show') != -1) {
-        bloco_center.style.zIndex = -1
-        return
-    }
+            bloco_center.style.zIndex = -1
+            return
+        }
     }
 
     bloco_center.style.zIndex = 'initial'

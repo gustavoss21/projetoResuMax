@@ -54,13 +54,14 @@ function criarQuill(folha) {
     })
 
     lista_Quill.push(quill)
-    //(11111111)
 
 }
 
 function urlImage() {
     let selection = this.quill.getSelection() //pegara a instancia de imagem definido acima
-    let prompt = window.prompt('URL da imagem')
+    let prompt = window.prompt('URL da imagem') 
+
     if (prompt === null || prompt == '') { return }
+    
     this.quill.insertEmbed(selection.index, 'image', prompt)//vai inserir a imagem aonde foi selecionado
 }

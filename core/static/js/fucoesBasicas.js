@@ -27,7 +27,6 @@ btn_nova_folha.addEventListener('click', () => {
  * @returns 
  */
 function setTypeSheet() {
-    let folhas = document.querySelectorAll('.editor')
     let checked_item = document.querySelectorAll("#bloco-right .dropdown-item")
     let sheet_mode = localStorage.getItem('sheet-mode')
     let mode_sheet_filter = localStorage.getItem('mode-filter')
@@ -72,14 +71,13 @@ function setTypeSheet() {
    
 }
 /**
- * ouve evento de click nos elementos html que contem o input filter
+ * ouve evento de click nos elementos que contem o input filter e muda o checked
  */
 function mudaCheckBox() {
     let click_checkbox = false
     let checked_item = document.querySelectorAll("#bloco-right .dropdown-item")
     // ao clicar no elemento <li> muda o valor do checkBox
     for (const value of checked_item) {
-        console.log(value)
         //se foi clicado diretamente no checkBox,a funcao nao precisa ser executada
         value.children[0].addEventListener("click", function () {
             click_checkbox = true
@@ -161,14 +159,13 @@ async function mode_filter(exist){
     for(let v of active_filters){
         if(!data_filters[v]){
             defineCheckItemVazio(v)
-            console.log()
             continue
         }
-        console.log(data_filters[v])
+
         data_filters_edited.push(...data_filters[v])
 
     }
-    console.log(data_filters_edited)
+
     create_html_to_filters(data_filters_edited)
     // events
     delete_filter_item()
@@ -250,8 +247,7 @@ function compare(a, b) {
 */
 function execultaApagaTexto() {   
     let btn_apaga_texto = document.querySelectorAll('.delete-tex-fucao')
-    //('execultaApagaTexto')
-    //(btn_apaga_texto)
+
     for (const elemeno of btn_apaga_texto) {
         elemeno.addEventListener('click', event => {
             let div_text = event.target.parentElement
@@ -276,8 +272,6 @@ function apagadorTextFucao(id) {
         data: JSON.stringify({'id': id }),
         dataType:'json',
         success: ()=>{
-            // delete_item_html_filter(id)
-
             mode_filter(true)
         },
         error:datas=>{console.log(datas)}
@@ -287,7 +281,7 @@ function apagadorTextFucao(id) {
 
 function delete_item_html_filter(tipo,id){
     let filter_item = $(`.text-${tipo}#${id}`)
-    console.log(`.text-${tipo}#${id}`)
+
     filter_item.remove()
     
     if($(`.text-${tipo}`).length < 1){
@@ -300,49 +294,32 @@ function delete_item_html_filter(tipo,id){
 function clickedTecla(btn) {
     let cursor = document.getSelection()
     let folhas = document.querySelectorAll('.ql-editor')
-
+   
     if (!cursor.anchorNode) {
         return false
     }
-    let cursor_node = cursor.anchorNode
-
-    // certifica que o cursor_node seja um paragrafo
-    if (cursor_node.nodeName === '#text') {
-        cursor_node = cursor.anchorNode.parentNode
-    }
+    let cursor_is_node = cursor.anchorNode
+    //certifica que o seletor_p é um parágrafo e evitar obter #text no lugar de <p>
+    const cursor_node = cursor_is_node.nodeName == 'P'? cursor_is_node:$(cursor_is_node).closest('p')[0]
+    if(!cursor_node) return
     let folha = cursor_node.parentElement
+    let check_limitin_sheet = checkLimitionSheet(folha)
     let index_folha = [...folhas].indexOf(folha)
-    // certica que tenha o index da folha
-    if (index_folha === -1) {
-        folha = cursor_node.parentElement.parentElement
-        index_folha = [...folhas].indexOf(folha)
-
-    }
-
     let getSeletor = lista_Quill[index_folha]
+
     if (!getSeletor) return false
 
     getSeletor = getSeletor.getSelection()
     let index_seletor = getSeletor.index
-    if(btn === 'controlV'){
-        SeMudanca(index_folha)
+
+    if (btn.key === 'Enter') {
         
-    }else if (btn.key === 'Enter') {
         //desce texto que passar 
-        if(folha.offsetHeight < folha.scrollHeight){
-            let seletor
-            let seletor_p
-            let func_seletor = ()=>{
-                seletor = window.getSelection()
-                seletor_p = seletor.anchorNode
-            }
-            func_seletor()
-            
-            //certifica que o seletor_p é um parágrafo e evitar obter #text no lugar de <p>
-            seletor_p = seletor_p.nodeName == 'P'? seletor_p:seletor_p.parentNode
+        if(check_limitin_sheet.passou){
+
             let proxima_folha = folhas[index_folha+1]
 
-            if(seletor_p === folha.lastChild){
+            if(cursor_node === folha.lastChild){
                 if(!proxima_folha){
                     proxima_folha = novaFolha(true)
                     
@@ -350,22 +327,21 @@ function clickedTecla(btn) {
                 let last_paragraph = folha.lastElementChild
                 $(proxima_folha).prepend(last_paragraph.outerHTML)
                 last_paragraph.remove()
-                // lista_Quill[index_folha+1].setSelection(1,0,'api')
                 setCursor(proxima_folha.firstChild)
                 return
             }
+            console.log(cursor_node)
             if (!proxima_folha) {
-                proxima_folha = novaFolha(true)
+                proxima_folha = novaFolha({'return_sheet':true})
             }
 
             let elements_down = downText(folhas[index_folha])
+            console.log(cursor_node)
             if (elements_down) {
-                lista_conteudo += elements_down
-                setTextSheet(proxima_folha,lista_conteudo,false)
+                setTextSheet(proxima_folha,elements_down,false)
             }
-            seletor_p = folha.children[getSeletor.index]
-            setCursor(seletor_p)
-
+            console.log(cursor_node)
+            setCursor(cursor_node)
         }
         
     }else if (btn.key === 'Backspace'){
@@ -388,26 +364,35 @@ function clickedTecla(btn) {
         let proxima_folha = folhas[index_folha + 1]
         return moveTextUp(folhas[index_folha], proxima_folha)
 
-    }else if (btn.key === 'Delete'){
-        return moveTextUp(folhas[index_folha], proxima_folha)
-        
-    } else if (btn.key == 'ArrowUp') {
+    }else if (btn.key == 'ArrowUp') {
         if (index_seletor === 0 && folhas[index_folha - 1]) {
             let elemeno = folhas[index_folha - 1].lastChild
             setCursor(elemeno)
             return
         }
     } else if (btn.key == 'ArrowDown') {
-       
         let next_sheet = folhas[index_folha + 1]
+        let proxima_folha = folhas[index_folha + 1]
+        if (! proxima_folha) return
+        let text_length = folha.textContent.length
+        let selection = lista_Quill[index_folha].getSelection()
+        let selection_index = selection.index
 
-        if (! next_sheet) return
-        let p_limite = $('.limite')[index_folha]
-
-        if (cursor_node==p_limite) {
+        if (selection_index > text_length) {
             let elemeno = next_sheet.firstChild
             setCursor(elemeno)
             return
+        }
+    } else{
+        //desce texto que passar
+        let proxima_folha = folhas[index_folha + 1]
+        if(check_limitin_sheet.passou){
+       
+            if (check_limitin_sheet.passou) SeMudanca(index_folha)
+    
+        }else if(check_limitin_sheet.has_space ) {    
+
+            return moveTextUp(folhas[index_folha], proxima_folha)
         }
     }
 }
@@ -438,9 +423,7 @@ function geraPdf() {
         if (!(cont === total_paginas)) {
             pdf.addPage()
             verticalOffset = 1
-
         }
-
     }
     
     pdf.save('meu_reumo.pdf')
@@ -473,22 +456,25 @@ function btnLeituraActive (){
  * define um ultimo paragrafo para a folha para delimitar o fim
  * @param {Element} folha 
  */
-function paragrafoDeLimite(){
+function paragrafoDeLimite(folha){
     let ql_editor = $('.ql-editor')
     //evitar error, no folha filter nao precisa do paragrafoDeLimite()
     if($('.sheet-filter').length > 0) return
 
     for(let c=0; c< ql_editor.length; c++){
         let editor = ql_editor[c].lastChild
+
         if(!editor)return
+
         let height = editor.offsetTop
 
         if (height <= ql_editor[c].offsetHeight/5)continue
-        $('.limite')[c].remove()
+
+        if($('.limite')[c]) $('.limite')[c].remove()
+        
         let p_limite = document.createElement('p')
         $(p_limite).addClass('limite').css('background','red')
-
-        $(v).append(p_limite)
+        ql_editor.append(p_limite)
     }
 
 }

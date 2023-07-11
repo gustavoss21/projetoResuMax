@@ -7,64 +7,19 @@
 body {
     background-color: #0c0b0b08;
 }
-/* ######################### */
-/* cabecalho */
-header {
-    background: lightblue;
-}
 
-header li:hover {
-    background-color: #5794a8;
-    border-radius: 10px;
-    color: white;
-}
+:root{
+    --top-type: blue;
+    --imp-type: red;
+    --des-type: yellow;
+    --bg-cinza: black;
+    --bg-azul-escuro: lightblue;
+    --bg-azul-claro: rgba(173, 216, 230, 0.500);
+    --sheet-one: white;
+    --sheet-two: rgba(250, 218, 13, 0.454);
+    --btn: #6c757d;
+    --hover:rgb(204 116 17);
 
-header a:hover {
-    color: white;
-}
-main.row{
-    margin-bottom: 50px;
-}
-
-.navbar-brand {
-    font-size: 3.5em;
-}
-
-.navbar-brand>span {
-    color: red;
-}
-
-/* ######################### */
-/* barra lateral esquerda */
-.barra-lateral-esquerda {
-    color: rgb(0, 0, 0);
-    font-size: 1.2em;
-    padding: 20px 0px 0px 10px;
-    background-color: rgba(173, 216, 230, 0.500);
-    width: 198px;
-    box-sizing: border-box;
-    /* width: 170px; */
-    /* position: fixed; */
-}
-.barra-lateral-esquerda button {
-    min-width: 133px;
-    margin: 0px 0px 10px 11px;
-}
-
-
-.barra-lateral-esquerda .solo:hover {
-    background-color: LightBlue;
-}
-
-.bloco-right li.ol:hover {
-    background-color: rgba(173, 216, 230, 0.494);
-}
-.btn-group ul.dropdown-menu{
-    padding: 5px;
-    width: auto !important;
-}
-.barra-lateral-esquerda i {
-font-size: 18px;
 }
 
 @media (max-width:768px) {
@@ -81,7 +36,78 @@ font-size: 18px;
             border-radius: 0%;
             box-sizing: border-box;
             padding: 5px;
-        }
+    }
+    #conteudo-central {
+        /* margin: 30px; */
+        margin-left: 60px;
+    }
+}
+
+
+/* ######################### */
+/* cabecalho */
+header {
+    background: lightblue;
+}
+header li{
+    padding-left: 5px;
+}
+header li:hover {
+    background-color: #5794a8;
+    border-radius: 10px;
+    color: white;
+}
+
+header a:hover {
+    color: white;
+}
+main.row{
+    margin-bottom: 50px;
+}
+
+.navbar-brand {
+    font-size: 3.5em;
+    color:#6c757d;
+    color:#6c757d;
+    font-family: serif;
+    font-weight: bold;
+}
+
+.navbar-brand>span {
+    color: rgb(204 116 17);
+}
+
+/* ######################### */
+/* barra lateral esquerda */
+.barra-lateral-esquerda {
+    color: rgb(0, 0, 0);
+    font-size: 1.2em;
+    padding: 20px 0px 0px 10px;
+    background-color: rgba(173, 216, 230, 0.500);
+    width: 198px;
+    box-sizing: border-box;
+}
+
+.barra-lateral-esquerda button {
+    min-width: 133px;
+    margin: 0px 0px 10px 11px;
+}
+
+.barra-lateral-esquerda .solo:hover {
+    background-color: LightBlue;
+}
+
+.bloco-right li.ol:hover {
+    background-color: rgba(173, 216, 230, 0.494);
+}
+
+.btn-group ul.dropdown-menu{
+    padding: 5px;
+    width: auto !important;
+}
+
+.barra-lateral-esquerda i {
+    font-size: 18px;
 }
 
 i.icon-saved{
@@ -96,17 +122,10 @@ i.icon-saved{
     width: 100%;
     margin: initial;
 }
-/* #conteudo-central {
-    margin-top: 10px;
-    margin-left: 175px;
-    margin-right: 20px;
-    margin-bottom: 20px;
-} */
+
 #bloco-center {
     position: relative;
     padding: initial;
-    /* position: static; */
-    /* left: 15px; */
 }
 
 .editor.ql-container {
@@ -118,7 +137,6 @@ i.icon-saved{
     font-size: inherit;
     /* position: initial; */
 }
-
 
 .editor .ql-editor {
     padding: 0 !important;
@@ -172,30 +190,14 @@ i.icon-saved{
 #check-li li:hover {
     background-color: initial;
 }
+
 #folha-obtida{
     position: relative;
     max-width: 80%;
     margin: auto;
     box-sizing: border-box;
 }
-/* .conteinar-tex-funcao{
-    background: #00000063;
-    padding: 37px 10px 10px 10px;
-    border-radius: 10px;
-} */
-/* .text-fucao{
-    display: flex;
-    flex-wrap: nowrap;
-    align-content: center;
-    justify-content: space-between;
-    align-items: center;
-} */
-@media (max-width:768px) {
-    #conteudo-central {
-        /* margin: 30px; */
-        margin-left: 60px;
-    }
-}
+
 #maisfolha{
     background-color: #0061ff;
     max-width: 116px;
@@ -205,26 +207,11 @@ i.icon-saved{
     padding: 5px 10px;
     display: none;
 }
+
 #maisfolha:hover{
     background-color: #033789;
 }
 
-
-/* 
-subtema-color: blue
-topico-color: green
-importante-color: red
-destaque-color:yellow
- */
-/* .text-destaque,
-.text-importante,
-.text-subtema,
-.text-topico {
-    margin-bottom: 20px;
-    padding: 10px;
-    background-color: white;
-    box-shadow: 1px 1px 3px #00000052;
-} */
 .text-fucao textarea{
     font-size: 0.5rem;
 }
@@ -232,42 +219,26 @@ destaque-color:yellow
 .delete-tex-fucao {
     cursor: pointer;
 }
+
 .delete-tex-fucao:hover {
     background-color: red;
     color: white;
 }
 
-.text-subtema {
-    border: 1px solid rgb(0, 0, 255, 0.5);
-}
-
 .text-topico {
-    border: 1px solid rgb(0, 128, 0, 0.5);
+    border: 1px solid var(--top-type);
 }
 
 .text-importante {
-    border: 1px solid rgb(255, 0, 0, 0.5);
+    border: 1px solid var(--imp-type);
 }
 
 .text-destaque {
-    border: 1px solid rgb(255, 255, 0, 0.5);
+    border: 1px solid var(--des-type);
 }
-/* #btn-baixar-resumo {
-    position: relative;
-    top: -28px;
-    padding: 10px;
-    border-radius: 5px;
-    background-color: #565e64;
-    color: white;
-    font-size: 15px;
-    box-shadow: 5px 2px 8px 0px #0a0a0a4f;
-} */
-/* #btn-baixar-resumo:hover {
-        box-shadow: inset 0px 0px 8px 0px;
-} */
+
 /* ######################### */
 /* barra lateral direita */
-
 
 .barra-folha li:hover {
     background-color: LightBlue;
@@ -284,8 +255,10 @@ destaque-color:yellow
 #bloco-right ul.dropdown-menu li {
     padding: 10px;
 }
+
 /* ######################### */
 /* range flutuate */
+
 #tamanho-folha-edit {
     position: fixed;
     bottom: 50px;
@@ -293,10 +266,3 @@ destaque-color:yellow
     width: 276px;
 }
 /* ######################### */
-/* resposividade */
-
-@media (min-width:992px) {}
-
-@media (max-width:992px) {}
-
-@media (max-width:768px) {}

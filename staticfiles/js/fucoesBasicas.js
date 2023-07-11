@@ -1,14 +1,9 @@
-let checked_item = document.querySelectorAll("#bloco-right .dropdown-item")
 let checked_filter = document.querySelector("#bloco-right #filtro")
 let btn_baixar_html = document.querySelector('#btn-baixar-pdf')
 let btn_nova_folha = document.querySelector('#btn-nova-folha')
 
-const btn_baixar_resumo = document.createElement('button')
 let Lista_checked_true = []
-let lista_funcoes_texto
 
-let div_container = document.createElement('div')
-div_container.setAttribute('class', 'conteinar-tex-funcao')
 
 // cria uma folha em branca
 btn_nova_folha.addEventListener('click', () => {
@@ -25,185 +20,218 @@ btn_nova_folha.addEventListener('click', () => {
     novaFolha(false, true)
 })
 
-
-async function definicoesFilter(recarrega) {
-    let checked_filter = document.querySelector("#bloco-right #filtro")
-    let editor = document.querySelectorAll('.editor')
-    salvarNoStorage('filtro', checked_filter.checked)
-    console.log('definicoesFilter')
-    if (checked_filter.checked) {
-        deactivateButton()
-
+/**
+ * aplica definiçoes de acordo com o tipo de folha
+ * @tipos_de_folha [editor, leitura, filtro]
+ * @param {Boolean} recarrega se true recarrega a pagina
+ * @returns 
+ */
+function setTypeSheet() {
+    let checked_item = document.querySelectorAll("#bloco-right .dropdown-item")
+    let sheet_mode = localStorage.getItem('sheet-mode')
+    let mode_sheet_filter = localStorage.getItem('mode-filter')
+    
+    if (mode_sheet_filter == 'true') {
+        set_btn_side(true)
         // esconde as folhas     
-        for (let folha of editor) {
-            folha.setAttribute('hidden', 'hidden')
-        }
+        $('.editor').hide()
+        if($("#folha-leitura").length > 0 ){$("#folha-leitura").remove()}
         
-        // habilita o checkBox
+        // habilite  checkBox from filter item
         for (let item of checked_item) {
             item.children[0].disabled = false;
-  
         }
-        if (recarrega) {
-        location.reload(true)
-        }
-
-        lista_funcoes_texto = await getDataAll()
-
-        defineCheckItemVazio()
-        setTextCheckBox()
-
-        return 
-
-    } else {
-        let folha_leitura = document.querySelector('#folha-leitura')
-        activateButton()
-        // torna visivel as folhas
-        if (modo_leitura && folha_leitura) {
-            folha_leitura.removeAttribute('hidden')
-
-        } else {
-            if (folha_leitura) folha_leitura.remove()
-            
-            for (let folha of editor) {
-                folha.removeAttribute('hidden')
-            }
-        }
-        
-        if (!folhas_renderizadas) {
-            rangeFolha()
-        } 
-
-        // desabilita os checkBox
+        mode_filter()
+        return
+    }else{
+        // deabilite checkbox filter
+        $('#btn-filter')[0].checked = false
         for (let item of checked_item) {
             item.children[0].disabled = true;
         }
-        // elimina o elemento que contem o filter-text
-        if (div_container) {
-            div_container.remove()
+
+        if($(".sheet-filter").length > 0) $(".sheet-filter").remove()
+
+        set_btn_side(false)
+        if (sheet_mode == 'leitura') {
+            $('.sheet-editable').hide()
+            $('.edit').prop('disabled', true)
+            read_mode_sheet()
+            return
         }
+        if(sheet_mode == 'editor'){
+            $('.edit').prop('disabled', false)
 
+            if($("#folha-leitura").length > 0 ){$("#folha-leitura").remove()}
+
+            filter_mode_sheet()
+
+        }
     }
+   
 }
-
+/**
+ * ouve evento de click nos elementos que contem o input filter e muda o checked
+ */
 function mudaCheckBox() {
     let click_checkbox = false
+    let checked_item = document.querySelectorAll("#bloco-right .dropdown-item")
     // ao clicar no elemento <li> muda o valor do checkBox
     for (const value of checked_item) {
         //se foi clicado diretamente no checkBox,a funcao nao precisa ser executada
         value.children[0].addEventListener("click", function () {
             click_checkbox = true
-            // se clicar no elemeno <input> salva no storage o checked
+            
             if (value.children[0].checked) {
-                ativaCheckBox(value.children[0],true)
+                changeCheckBoxFilterItem(value.children[0],true)
             } else {// se clicar no elemeno <input> salva no storage o checked
-                desativaCheckBox(value.children[0],false)
+                changeCheckBoxFilterItem(value.children[0],false)
             }
+            mode_filter(true)
             salvarNoStorage('filter-' + this.value, [this.checked, this.value])
         }, true)
         // fucao que muda o checkBox
-        value.addEventListener("click", function () {
+        value.addEventListener("click", async function () {
 
-            let input_li = value.children[0]
+            let checkbox_filter = value.children[0]
             // se clicar no checkBox, fecha a fucao
             if (click_checkbox) {
                 click_checkbox = false
-                return setTextCheckBox()
+                return check_active_filters()
             }
             // se o filtro nao tiver ativado, fecha a fucao
             if (!checked_filter.checked) {
                 return
             }
             // se clicar no elemeno <li> munda o checkBox para true
-            if (input_li.checked) {
-                ativaCheckBox(input_li,false)
+            if (checkbox_filter.checked) {
+                changeCheckBoxFilterItem(checkbox_filter,false)
             } else {// se clicar no elemeno <li> munda o checkBox para false
-                desativaCheckBox(input_li,true)
+                changeCheckBoxFilterItem(checkbox_filter,true)
             }
-            // location.reload(true)
-
-            return setTextCheckBox()
+            mode_filter(true)
+            return check_active_filters()
         })
     }
 }
-
-function ativaCheckBox(input,boolen) {
+/**
+ *muda o valor do checkbox do item do filtro e salva no storage
+ * @param {Element} input checkbox do item do filtro
+ * @param {Boolean} boolen checked que será dinido no input
+ */
+function changeCheckBoxFilterItem(input,boolen) {
     input.checked = boolen
     salvarNoStorage('filter-' + input.value, [boolen,input.value])
 }
+/**
+ * verifica quais filtros estao ativos
+ * @returns {Array} active_filters
+ */
+function check_active_filters() {
+    let filters_checked = document.querySelectorAll('.check-container input')
+    let active_filters = []
 
-function desativaCheckBox(input,boolen) {
-    input.checked = boolen
-    salvarNoStorage('filter-' + input.value, [boolen, input.value])
-}
+    if(! $('#filtro')[0].checked) return []
 
-function setTextCheckBox() {
-    // creates a list with active filters and returns it
-    div_container.innerHTML = '' 
-    Lista_checked_true = []
-    let tem_item = false
-    if (!lista_funcoes_texto) return
-    for (let item_fucao_key of Object.keys(lista_funcoes_texto)) {
-        let input_li = lista_funcoes_texto[item_fucao_key][1]
-        if (input_li.checked) {
-            tem_item = true
-            Lista_checked_true.push(...lista_funcoes_texto[item_fucao_key][0])
+    for (let filter_checked of filters_checked) {
+        let filter_type = filter_checked.value
+
+        if (filter_checked.checked) {
+            active_filters.push(filter_type)
         }
     }
-
-    if (tem_item) {
-        return setTextFilter()
-    }
+    return active_filters
 }
 
-function setTextFilter() {
+async function mode_filter(exist){
+    salvarNoStorage('mode-filter',true)
+    if(exist){
+        if($(".sheet-filter").length > 0) $(".sheet-filter").remove()
+        $('.conteinar-tex-funcao').remove()
+    }
+    let active_filters = check_active_filters()
+    let data_filters = []
+    let data_filters_edited = []
+
+    if (active_filters.length >= 1 ){
+        data_filters = await get_filter_items(active_filters)
+    } 
+    for(let v of active_filters){
+        if(!data_filters[v]){
+            defineCheckItemVazio(v)
+            continue
+        }
+
+        data_filters_edited.push(...data_filters[v])
+
+    }
+
+    create_html_to_filters(data_filters_edited)
+    // events
+    delete_filter_item()
+    execultaApagaTexto()
+}
+/**
+ * cria todos os campos de filtro e define todos os seus valores
+ */
+function create_html_to_filters(lista_funcoes_texto) {
     // btn_baixar_resumo = document.querySelector('button')
-    console.log('setTextFilter')
-    let nova_lista
-    btn_baixar_resumo.setAttribute('id','btn-baixar-resumo')
-    btn_baixar_resumo.innerHTML = 'baixar resumo'
+    let btn_baixar_resumo = document.createElement('button')
+    let div_container = document.createElement('div')
+    div_container.setAttribute('class', 'conteinar-tex-funcao')
     div_container.innerHTML = ''
+
+    let content_filter_text = document.createElement('div')
+    content_filter_text.setAttribute('class','p-1 bg-light')
+
+    let sheet_text = ''
+    let nova_lista
+
+    btn_baixar_resumo.setAttribute('id','btn-baixar-resumo')
+    btn_baixar_resumo.setAttribute('class','btn btn-secondary')
+    btn_baixar_resumo.innerHTML = 'baixar resumo'
+    
     div_container.appendChild(btn_baixar_resumo)
-    bloco_center.appendChild(div_container)
+    $('.barra-lateral-esquerda').append(div_container)
     if (lista_funcoes_texto.length > 1) {
-        nova_lista = Lista_checked_true.sort(compare)
+        nova_lista = lista_funcoes_texto.sort(compare)
 
     } else {
-        nova_lista = Lista_checked_true
+        nova_lista = lista_funcoes_texto
     }
 
-    for (let texto of nova_lista) {
+    for (let filter_item of nova_lista) {
+        sheet_text += ' ' + filter_item.text
         let div_fucao_texto = document.createElement('div')
-        let new_p = document.createElement('p')
-
-        if (texto.subtema) {
-            new_p.appendChild(document.createTextNode(texto.subtema))
-            div_fucao_texto.setAttribute('class', 'text-fucao text-subtema')
-        } else if (texto.topico) {
-
-            new_p.appendChild(document.createTextNode(texto.topico))
-            div_fucao_texto.setAttribute('class', 'text-fucao text-topico')
-        } else if (texto.importante) {
-            new_p.appendChild(document.createTextNode(texto.importante))
-            div_fucao_texto.setAttribute('class', 'text-fucao text-importante')
-
-        } else {
-            new_p.appendChild(document.createTextNode(texto.destaque))
-            div_fucao_texto.setAttribute('class', 'text-fucao text-destaque')
-        }
-        div_fucao_texto.setAttribute('id', texto.id)
+        div_fucao_texto.setAttribute('class', `text-fucao text-${filter_item.type} input-group mb-1`)
+        div_fucao_texto.setAttribute('id', filter_item.id)
         
-        div_fucao_texto.appendChild(new_p)
-        let span_delete = document.createElement("span")
-        span_delete.setAttribute('class', 'delete-tex-fucao')
-        let icon = document.createTextNode('X')
-        span_delete.appendChild(icon)
-        div_fucao_texto.appendChild(span_delete)
-        div_container.appendChild(div_fucao_texto)
+        let new_p = `<textarea style="resize: none;" aria-label="X" class="form-control" readonly>
+                        ${filter_item.text}
+                    </textarea>`
+        
+        let span_delete = `<span class="input-group-text delete-tex-fucao">X</span>`
+        
+        $(div_fucao_texto).append(new_p)
+        $(div_fucao_texto).append(span_delete)
+        content_filter_text.appendChild(div_fucao_texto)
+    }    
+    if(sheet_text.length <= 1){
+        btn_baixar_resumo.setAttribute('disabled',true)
+        content_filter_text.setAttribute('hidden','hidden')
     }
 
-    
-    return  execultaApagaTexto()
+    div_container.appendChild(content_filter_text)
+    let folha_filter = `
+    <div class="editor ql-container sheet-filter" id="folha-leitura">
+        <div class="ql-editor">${sheet_text}</div>
+    </div>`
+    $("#bloco-center").append(folha_filter)
+    let textarea = document.querySelectorAll('.conteinar-tex-funcao textarea')
+    for(let t of textarea){
+        t.style.height = t.scrollHeight+'px'
+        t.style.overflow = 'hidden'
+    }
 }
 
 function compare(a, b) {
@@ -219,85 +247,79 @@ function compare(a, b) {
 */
 function execultaApagaTexto() {   
     let btn_apaga_texto = document.querySelectorAll('.delete-tex-fucao')
-    console.log('execultaApagaTexto')
-    console.log(btn_apaga_texto)
-    for (const elemeno of btn_apaga_texto) {
-        elemeno.addEventListener('click', function () {
 
-            let div_text = this.parentElement
+    for (const elemeno of btn_apaga_texto) {
+        elemeno.addEventListener('click', event => {
+            let div_text = event.target.parentElement
             let class_div = div_text.getAttribute('class').slice(11,)
             class_div = class_div.split('-')[1]
             let class_div_id = div_text.getAttribute('id')
-            apagadorTextFucao(class_div, parseInt(class_div_id))
+            apagadorTextFucao(class_div_id)
         })
     }
     return
 }
 
 
-function apagadorTextFucao(tipo, id) {
+function apagadorTextFucao(id) {
     let csrf_token = document.querySelector('[name=csrfmiddlewaretoken]').value
-
-    fetch("/apagadorTextoFucao/", {
-        method: 'POST',
+    $.ajax({
+        type:'POST',
+        url: `/apagadorTextoFucao/`,
         headers: {
             'X-CSRFToken': csrf_token
         },
-        body: JSON.stringify({ 'tipo_texto_fucao': tipo, 'id': id })
-    }).then(function (data) {
-        return data.json()
-    }).then(function (data) {
-        location.reload(true)
-    })
+        data: JSON.stringify({'id': id }),
+        dataType:'json',
+        success: ()=>{
+            mode_filter(true)
+        },
+        error:datas=>{console.log(datas)}
+        });
+   
 }
 
+function delete_item_html_filter(tipo,id){
+    let filter_item = $(`.text-${tipo}#${id}`)
+
+    filter_item.remove()
+    
+    if($(`.text-${tipo}`).length < 1){
+        defineCheckItemVazio(tipo)
+    }
+    
+
+}
 
 function clickedTecla(btn) {
     let cursor = document.getSelection()
     let folhas = document.querySelectorAll('.ql-editor')
-
+   
     if (!cursor.anchorNode) {
         return false
     }
-    let cursor_node = cursor.anchorNode
-
-    // certifica que o cursor_node seja um paragrafo
-    if (cursor_node.nodeName === '#text') {
-        cursor_node = cursor.anchorNode.parentNode
-    }
+    let cursor_is_node = cursor.anchorNode
+    //certifica que o seletor_p é um parágrafo e evitar obter #text no lugar de <p>
+    const cursor_node = cursor_is_node.nodeName == 'P'? cursor_is_node:$(cursor_is_node).closest('p')[0]
+    if(!cursor_node) return
     let folha = cursor_node.parentElement
+    let check_limitin_sheet = checkLimitionSheet(folha)
     let index_folha = [...folhas].indexOf(folha)
-    // certica que tenha o index da folha
-    if (index_folha === -1) {
-        folha = cursor_node.parentElement.parentElement
-        index_folha = [...folhas].indexOf(folha)
-
-    }
-
     let getSeletor = lista_Quill[index_folha]
+
     if (!getSeletor) return false
 
     getSeletor = getSeletor.getSelection()
     let index_seletor = getSeletor.index
-    if(btn === 'controlV'){
-        SeMudanca(index_folha)
+
+    if (btn.key === 'Enter') {
         
-    }else if (btn.key === 'Enter') {
         //desce texto que passar 
-        if(folha.offsetHeight < folha.scrollHeight){
-            let seletor
-            let seletor_p
-            let func_seletor = ()=>{
-                seletor = window.getSelection()
-                seletor_p = seletor.anchorNode
-            }
-            func_seletor()
-            
-            //certifica que o seletor_p é um parágrafo e evitar obter #text no lugar de <p>
-            seletor_p = seletor_p.nodeName == 'P'? seletor_p:seletor_p.parentNode
+        if(check_limitin_sheet.passou){
+
             let proxima_folha = folhas[index_folha+1]
 
-            if(seletor_p === folha.lastChild){
+            if(cursor_node === folha.lastChild){
                 if(!proxima_folha){
                     proxima_folha = novaFolha(true)
                     
@@ -305,100 +327,81 @@ function clickedTecla(btn) {
                 let last_paragraph = folha.lastElementChild
                 $(proxima_folha).prepend(last_paragraph.outerHTML)
                 last_paragraph.remove()
-                // lista_Quill[index_folha+1].setSelection(1,0,'api')
                 setCursor(proxima_folha.firstChild)
                 return
             }
+            console.log(cursor_node)
             if (!proxima_folha) {
-                proxima_folha = novaFolha(true)
+                proxima_folha = novaFolha({'return_sheet':true})
             }
 
             let elements_down = downText(folhas[index_folha])
+            console.log(cursor_node)
             if (elements_down) {
-                lista_conteudo += elements_down
-                setTextSheet(proxima_folha,true,false)
-                // proxima_folha.innerHTML = elements_down+proxima_folha.innerHTML
+                setTextSheet(proxima_folha,elements_down,false)
             }
-            seletor_p = folha.children[getSeletor.index]
-            setCursor(seletor_p)
-
+            console.log(cursor_node)
+            setCursor(cursor_node)
         }
         
-    }
-    
-    if (index_seletor === 0 && folhas[index_folha - 1]) {
+    }else if (btn.key === 'Backspace'){
+        
+        if (!(folha.innerText.length > 1) && index_folha > 0) {
+            let folha_anterior = folhas[index_folha - 1]
+            if(! folha_anterior) return
+            let last_children = folha_anterior.lastChild
+            folha.parentElement.remove()//remove folha vazia
+            lista_Quill.splice(index_folha,1)//remove quill
+            setCursor(last_children)
+            return
+        }
+        if (index_seletor === 0 && folhas[index_folha - 1]) {
+            let elemeno = folhas[index_folha - 1].lastChild
+            setCursor(elemeno)
+            return moveTextUp(folhas[index_folha - 1], folhas[index_folha])
+        }
 
-        let elemeno = folhas[index_folha - 1].lastChild
+        let proxima_folha = folhas[index_folha + 1]
+        return moveTextUp(folhas[index_folha], proxima_folha)
 
-        //sobe o cursor
-        if (btn.key == 'ArrowUp') {
+    }else if (btn.key == 'ArrowUp') {
+        if (index_seletor === 0 && folhas[index_folha - 1]) {
+            let elemeno = folhas[index_folha - 1].lastChild
             setCursor(elemeno)
             return
-
-        }if (btn.key === 'Backspace') {
-
-            if (!(folha.innerText.length > 1)) {
-                folha.parentElement.remove()//remove folha sem vazio
-                lista_Quill.splice(index_folha,1)//remove quill
-                setCursor(elemeno)
-                return
-            }
-            sobeTextoFolha(folhas[index_folha - 1],folha)
-            elemeno = folhas[index_folha - 1].lastChild
-            setCursor(elemeno)
-
         }
-        
-    }else {
-        let proxima_folha = $('.ql-editor')[index_folha + 1]
-        if (cursor_node === folha.lastChild){
-            let passed_shore = check_marge(folha)
-            if (! passed_shore) return
-        // desce o cursor para o primeiro elemento da pagina seguinte 
-            if(!proxima_folha){
-                // proxima_folha = novaFolha(true)
-                return
-            }
-            let elemeno = proxima_folha.firstChild
+    } else if (btn.key == 'ArrowDown') {
+        let next_sheet = folhas[index_folha + 1]
+        let proxima_folha = folhas[index_folha + 1]
+        if (! proxima_folha) return
+        let text_length = folha.textContent.length
+        let selection = lista_Quill[index_folha].getSelection()
+        let selection_index = selection.index
 
-            if (btn.key === 'Backspace') {
-                cursor_node.remove()
-            }
-
+        if (selection_index > text_length) {
+            let elemeno = next_sheet.firstChild
             setCursor(elemeno)
-
-        }else if (btn.key === 'Delete' || btn.key === 'Backspace'){
-            return sobeTextoFolha(folhas[index_folha], proxima_folha)
-            
+            return
         }
-    } 
-}
-function check_marge(folha){
-    let check_folha = $(folha).is('.ql-editor')
-    if (! check_folha) ReferenceError('elemento inadequado!')
-    let last_children_height = folha.lastChild.offsetHeight
-    let sheet_height = folha.offsetHeight
-    let last_children_position = folha.lastChild.offsetTop
-    last_children_position += last_children_height
-        
-    if(sheet_height-last_children_height <= last_children_position){
-        return true
+    } else{
+        //desce texto que passar
+        let proxima_folha = folhas[index_folha + 1]
+        if(check_limitin_sheet.passou){
+       
+            if (check_limitin_sheet.passou) SeMudanca(index_folha)
+    
+        }else if(check_limitin_sheet.has_space ) {    
+
+            return moveTextUp(folhas[index_folha], proxima_folha)
+        }
     }
-    return false
-
-
 }
+
 function geraPdf() {
-    let elementos = document.querySelectorAll('.text-fucao > p')
-    let html = ''
+    let html = $(".sheet-filter")[0].innerText
     let pdf = new jsPDF('p','in','a4')
     let ultimo_index = 50
     let primeiro_index = 0
-
-    for (let texto of elementos) {
-        html += `\n${texto.innerHTML}`
-    }
-
     let textlines = pdf.setFont('Arial')
         .setFontSize(12)
         .splitTextToSize(html, 6.25);
@@ -420,61 +423,65 @@ function geraPdf() {
         if (!(cont === total_paginas)) {
             pdf.addPage()
             verticalOffset = 1
-
         }
-
     }
     
     pdf.save('meu_reumo.pdf')
 }
-
-function deactivateButton() {
-    let btn_barra_lateral = document.querySelector('#bloco-right').children
-    let btn_adicionar_pdf = document.querySelector('#btn-adicionar-pdf')
-    btn_adicionar_pdf.disabled = true
-
-    // barra_lateral_childre
-    for (let btn_index = 0; btn_index < btn_barra_lateral.length; btn_index++){
-
-        if (btn_index === 0) continue
-        if (btn_barra_lateral[btn_index].hasAttribute('id')) {
-
-            if (btn_barra_lateral[btn_index].getAttribute('id') === 'btn-leitura') {
-                continue
-            }
-
-        btn_barra_lateral[btn_index].disabled = true
-
-        }
-
+/**
+ * define os botoes da barra lateral para o filtro ou editor 
+ * @param {Boolean} filter 
+ */
+function set_btn_side(filter) {
+    if(filter){
+        $('.conf-sheet').hide()
+        return
     }
+    $('.conf-sheet').show()
+    $('.conteinar-tex-funcao').remove()
 }
 
-function activateButton() {
-    let btn_barra_lateral = document.querySelector('#bloco-right').children
-    let btn_adicionar_pdf = document.querySelector('#btn-adicionar-pdf')
-    btn_adicionar_pdf.disabled = false
-
-    // barra_lateral_childre
-    for (let btn_index = 0; btn_index < btn_barra_lateral.length; btn_index++) {
-        if (btn_index === 0) continue
-            if (btn_barra_lateral[btn_index].hasAttribute('id')) {
-
-                if (btn_barra_lateral[btn_index].getAttribute('id') === 'btn-leitura') {
-                    continue
-                }
-            }
-            btn_barra_lateral[btn_index].disabled = false
-
-    }
-}
 function btnLeituraActive (){
     
     let path = location.href
     if (path === 'http://127.0.0.1:8000/adiciona-arquivo/') {
-    console.log('iguais')
+    //('iguais')
         $('#btn-leitura').attr('disabled',true)
     } else {
         $('#btn-leitura').attr('disabled',false)
     }
+}
+
+/**
+ * define um ultimo paragrafo para a folha para delimitar o fim
+ * @param {Element} folha 
+ */
+function paragrafoDeLimite(folha){
+    let ql_editor = $('.ql-editor')
+    //evitar error, no folha filter nao precisa do paragrafoDeLimite()
+    if($('.sheet-filter').length > 0) return
+
+    for(let c=0; c< ql_editor.length; c++){
+        let editor = ql_editor[c].lastChild
+
+        if(!editor)return
+
+        let height = editor.offsetTop
+
+        if (height <= ql_editor[c].offsetHeight/5)continue
+
+        if($('.limite')[c]) $('.limite')[c].remove()
+        
+        let p_limite = document.createElement('p')
+        $(p_limite).addClass('limite').css('background','red')
+        ql_editor.append(p_limite)
+    }
+
+}
+
+function delete_filter_item(){
+    let btn_baixar_resumo = document.querySelector('#btn-baixar-resumo')
+    btn_baixar_resumo.addEventListener('click', function () {
+        geraPdf()
+    })
 }

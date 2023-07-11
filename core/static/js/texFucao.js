@@ -7,11 +7,11 @@ let selection_text
 let selection_folha_index
 let selection_index
 let selection_length
+let cont = 0
 
 function retorna_html() {
-    primeiroParagrafoFolha()
-    let elemento_vazio
     let conteudo = ''
+
     $('.ql-editor').each((i,pagina)=>{
         elemento_vazio = pagina.firstElementChild
         conteudo += pagina.innerHTML
@@ -20,7 +20,6 @@ function retorna_html() {
     if ((conteudo.replace(/<[^>]*>/g, '')).length <= 1){
         conteudo = false
     }
-    //(conteudo)
     return conteudo
 }
 
@@ -29,6 +28,7 @@ function salvarConteudo() {
     origin = location.origin
 
     if(!html_sheets)return
+
     $.ajax({type:'POST',
         headers: {
             'X-CSRFToken': csrf_token
@@ -37,6 +37,7 @@ function salvarConteudo() {
         data:html_sheets,
         success: data=>{
             let data_object = JSON.parse(data)
+
             if (data_object.redirect) {
                 salvarNoStorage('texto_temporario',html_sheets)
                 location.assign('usuario/accounts/login/');
@@ -62,7 +63,6 @@ function anitionSavedContedudo(){
 }
 
 function save_filter_item(selection_type) {
-
     if (! selection_text) return
 
     fetch("/save-filter-item/", {
@@ -70,7 +70,15 @@ function save_filter_item(selection_type) {
         headers: {
             'X-CSRFToken': csrf_token
         },
-        body: JSON.stringify({'type':selection_type, 'text': selection_text, 'index': selection_index, 'tamanho': selection_length, 'folha_index': selection_folha_index })
+        body: JSON.stringify(
+            {
+                'type':selection_type,
+                'text': selection_text,
+                'index': selection_index,
+                'tamanho': selection_length,
+                'folha_index': selection_folha_index
+            }
+        )
     }).then(function (data) {
         return data.json()
     }).then(function (data) {
@@ -90,9 +98,9 @@ function criaSeletor() {
     let caixa_selecao = document.createElement('div')
     let title = document.createElement('span')
     let div_opcoes_selecao = document.createElement('div')
-    div_opcoes_selecao.setAttribute('class','conteudo-selecao')
     let filter_types = ['destaque','topico','importante']
 
+    div_opcoes_selecao.setAttribute('class','conteudo-selecao')
     caixa_selecao.setAttribute('class', 'selecao')
     title.setAttribute('class', 'title-selecao')
     title.innerText = 'definir como:'
@@ -111,6 +119,7 @@ function cria_elemento_seletor(type){
     btn.innerText = type
     return btn
 }
+
 /**
  * adiciona caixa_seletor na toolbar
  */ 
@@ -122,31 +131,27 @@ function adicionaFucaoTextoToolbar() {
         box.parentElement.style.zIndex = 1
         if (!seltor_existe) {
             box.appendChild(criaSeletor())
-
         }
-
     }   
 }
+
 /**
  * faz atribuição a elementos que sera salvo, como texto, index, length e o index da folha
 */
 function definicoesSelecaoTexto() {
     for (const q of lista_Quill){
         q.on('selection-change', function(range, oldRange, source) {
-            console.log(range)
+
             if (range) {
                 selection_index = range.index;
                 selection_text = q.getText(range.index, range.length);
                 selection_folha_index = lista_Quill.indexOf(q)
-                
                 selection_length = range.length
-                console.log('tex: '+selection_text)
             }  
         })
     }
-    
-    // return selection_text
 }
+
 /**
  * evita que o folha sopreponha a toolbar ou outros itens
  * 
@@ -174,18 +179,16 @@ adiciona o evento click nos botoes do caixa_seletor
 function setBotao() {
     let btn_set_filter = document.querySelectorAll(".conteudo-selecao")
     for (let btn of btn_set_filter) {
-        console.log(btn)
         btn.addEventListener('click',e => {
             let class_filter = e.target.getAttribute('class')
             let filter_type = (class_filter.split('-'))[1]
-            console.log(filter_type)
+
             save_filter_item(filter_type)    
         }
         )
     }
     
 }
-
 
 function tiraSelecao(index_quill,index) {
     lista_Quill[index_quill].setSelection(index, 0, "silent")
@@ -203,54 +206,58 @@ function submitForm() {
 
 function pdfAdd(data) {
     let palavras = data.split('. ')
+
     for (let index = 0; index < palavras.length; index++) {
         palavras[index] = `<p>${palavras[index]}.</p>`
     }
     return palavras.join('')
    
 }
-function control_v(){
+function control_v_or_x(){
     var ctrl=window.event.ctrlKey;
     var tecla=window.event.keyCode;
-    
-    if (ctrl && tecla==86) return true
+
+    if (ctrl && (tecla==86|tecla==88)) return true
 }
 
 function getSelecao() {
-    let btn_control_v = false
+    let control_key = false
+
     document.addEventListener('keydown', btn => {
-        btn_control_v = control_v()
+        control_key = control_v_or_x()
     })
+
     document.addEventListener('keyup', btn => {
        
-        if(btn_control_v){
+        if(control_key){
             clickedTecla('controlV')
             return
 
         }
 
         let list_btn = ['Delete', 'ArrowUp', 'Backspace', 'ArrowDown','Enter']
-        //(btn.key)
+        
         if (list_btn.indexOf(btn.key) === -1)return
         
         clickedTecla(btn)
-        clicked_tecla = true
     })
 }
+
 /**
  * verifica quais filter-text estao vazios e informa
  *  a seu respectivo filtro no html
  * @param {String} filter_item_name 
  */
 function defineCheckItemVazio(filter_item_name) {
-    // verifica se o elemento já tem a msg de vazio
     let tes = document.querySelector(".item-vazio-" + filter_item_name)
     if (!(tes)) {
         let lista_vazia = document.createElement('span')
         let texto = document.createTextNode('vazio!')
+
         lista_vazia.appendChild(texto)
         lista_vazia.setAttribute('class', 'item-vazio-' + filter_item_name)
         lista_vazia.style.color = '#00000070'
+
         document.querySelector('#' + filter_item_name).parentElement.appendChild(lista_vazia)
     }
 
@@ -258,11 +265,12 @@ function defineCheckItemVazio(filter_item_name) {
 
 async function get_filter_items(filter_items) {
     let data_object
+
     await  $.ajax({type:'GET',
         url: `${origin}/filter-items/${filter_items}`,
         success: data=>{
             data_object = JSON. parse(data)
-            console.log(data_object)
+
             if (data_object.redirect) {
                 location.assign('usuario/accounts/login/');
             }
@@ -299,9 +307,9 @@ document.addEventListener('click', event => {
 
     for (let btn of btn_class) {
         if (btn.search('show') != -1) {
-        bloco_center.style.zIndex = -1
-        return
-    }
+            bloco_center.style.zIndex = -1
+            return
+        }
     }
 
     bloco_center.style.zIndex = 'initial'
