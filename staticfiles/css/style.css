@@ -41,6 +41,12 @@ header {
     background: lightblue;
 }
 
+.form-range {
+    padding: 0 5px;
+    border-radius: 13px;
+    background-color: #0000002b;
+}
+
 header li:hover {
     background-color: #5794a8;
     border-radius: 10px;
