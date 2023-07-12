@@ -16,4 +16,3 @@ docker-compose.yaml
 *yaml*
 data/
 settings.py
-staticfiles/
